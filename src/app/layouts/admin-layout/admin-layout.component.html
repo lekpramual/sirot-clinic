@@ -1,0 +1,64 @@
+<!-- Header -->
+<mat-toolbar class="mat-elevation-z3" color="primary">
+  <!-- <a
+    mat-icon-button
+    #toggleButton
+    (click)="isMenuOpened.set(!isMenuOpened())"
+    [matTooltip]="!isMenuOpened() ? 'ขยายเมนู' : 'ยุบเมนู'"
+    matTooltipPosition="below"
+  >
+    <mat-icon>menu</mat-icon>
+  </a> -->
+
+  <!-- <span style="margin-left: 12px" class="title_logo">
+    <img
+        src="/assets/images/logo-header.png"
+        style="height: 52px"
+      />
+  </span>  -->
+
+
+  <span class="title_logo">
+   SIROT Clinic
+  </span>
+
+  <a mat-button routerLink="/dashboard" class="mx-2" style=" border-radius: 20px !important;height: 36px!important;">
+    <mat-icon>home</mat-icon>
+    หน้าแรก
+  </a>
+  <span class="reh-spacer"></span>
+
+  <!-- <button
+    mat-icon-button
+    [matMenuTriggerFor]="avatarMenu"
+    matTooltip="บัญชี"
+    matTooltipPosition="below"
+  >
+    <img src="/assets/images/account.png" alt="Avatar" class="avatar" />
+  </button> -->
+
+
+
+
+  <button mat-raised-button class="lj-btn-back" (click)="logout()">
+    <mat-icon class="material-icons-outlined">logout</mat-icon>
+    <span class="mat-subtitle-1">ออกจากระบบ</span> </button>
+
+
+</mat-toolbar>
+
+@if(loading){
+  <mat-progress-bar
+    mode="indeterminate"
+    color="accent"
+    style="position: sticky; bottom: 0; left: 0; width: 100%;">
+  </mat-progress-bar>
+}
+<!-- ./Header -->
+
+<!-- SideBar LG -->
+<div class="container-fluid " style="padding-right: 0px !important; padding-left: 0px !important;">
+  <router-outlet></router-outlet>
+</div>
+
+
