@@ -125,7 +125,7 @@ export class AdminLayoutComponent implements OnInit {
 
   logout() {
     // Clear the authentication token and other sensitive data from session storage
-    localStorage.clear();
+    sessionStorage.clear();
     // Optionally, redirect the user to the login page
     this.router.navigate(['/login']);
   }

@@ -22,6 +22,10 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent : (() => import("../app/pages/dashboard/dashboard.component")),
+      },
+      {
+        path: 'users',
+        loadComponent : (() => import("../app/pages/users/users.component")),
       }
     ],
   },

@@ -5,6 +5,7 @@
 :root {
   --blue-color: #2196f3;
   --primary-color: #153d77;
+  --blue900-color: #0D47A1;
   --secondary-color: #6c757d;
   --white-color: #fff;
   --green50-color: #e7f7ee;
@@ -211,6 +212,12 @@ mat-sidenav-content {
 
 .mat-tab-group {
   margin-bottom: 48px;
+}
+
+.mat-divider {
+  border-color: var(--blue900-color) !important;
+  border-top: 3px solid var(--blue900-color) !important;
+  height: 6px !important;
 }
 
 

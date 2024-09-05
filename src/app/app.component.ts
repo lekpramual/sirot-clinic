@@ -22,6 +22,6 @@ export class AppComponent {
   //  @HostListener('window:beforeunload', ['$event'])
   //  clearSessionOnClose(event: BeforeUnloadEvent): void {
   //    // Clear session storage
-  //    localStorage.clear();
+  //    sessionStorage.clear();
   //  }
 }

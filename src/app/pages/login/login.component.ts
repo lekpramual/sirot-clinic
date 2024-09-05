@@ -75,15 +75,39 @@ export class LoginComponent implements OnInit {
         const username = this.formInitial.controls['username'].value;
         const password = this.formInitial.controls['password'].value;
         if (username === 'admin' && password === 'abc123==') {
-          localStorage.setItem('authToken', username);
-          this.openSuccessSnackBar('ยินดีต้อนรับเข้าสู่ระบบ');
-          this.router.navigate(['dashboard']);
+          sessionStorage.setItem('authToken', username);
+          this._snackBar.open(`ยินดีต้อนรับเข้าสู่ระบบ`, '', {
+            duration:1500,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass:['success-snackbar']
+          }).afterDismissed().subscribe(() => {
+            this.router.navigate(['dashboard']);
+          });
         } else {
-          this.openFailureSnackBar('ชื่อผู้ใช้งาน หรือ รหัสผ่าน ไม่ถูกต้อง');
+          this._snackBar.open('ชื่อผู้ใช้งาน หรือ รหัสผ่าน ไม่ถูกต้อง', 'ลองอีกครั้ง', {
+            duration:3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass:['error-snackbar']
+          }).onAction().subscribe(() => {
+            // Handle the action button click here
+            console.log('Snackbar action button clicked!');
+            this.initForm();
+          });
         }
       } catch (error: any) {
         console.error(error);
-        this.openFailureSnackBar('การเข้าสู่ระบบผิดพลาด');
+        this._snackBar.open('การเข้าสู่ระบบผิดพลาด', 'ลองอีกครั้ง', {
+          duration:3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'bottom',
+          panelClass:['error-snackbar']
+        }).onAction().subscribe(() => {
+          // Handle the action button click here
+          console.log('Snackbar action button clicked!');
+          this.initForm();
+        });
       }
     }
   }
@@ -97,26 +121,4 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  onClickRegister() {
-    this.router.navigate(['auth/register']);
-  }
-
-  // Snackbar that opens with success background
-  openSuccessSnackBar(message: string) {
-    this._snackBar.open(message, '', {
-      duration: 1500,
-      panelClass: ['success-snackbar'],
-    });
-  }
-  //Snackbar that opens with failure background
-  openFailureSnackBar(message: string) {
-    this._snackBar.open(message, 'ลองเข้าระบบอีกครั้ง!', {
-      duration: 10*6000,
-      panelClass: ['error-snackbar'],
-    }).onAction().subscribe(() => {
-      // Handle the action button click here
-      console.log('Snackbar action button clicked!');
-      this.initForm();
-    });
-  }
 }
