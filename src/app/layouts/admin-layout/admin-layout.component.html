@@ -26,6 +26,10 @@
     <mat-icon>home</mat-icon>
     หน้าแรก
   </a>
+  <a mat-button routerLink="/users" class="mx-2" style=" border-radius: 20px !important;height: 36px!important;">
+    <mat-icon>person</mat-icon>
+    ผู้ใช้งาน
+  </a>
   <span class="reh-spacer"></span>
 
   <!-- <button
@@ -40,7 +44,7 @@
 
 
 
-  <button mat-raised-button class="lj-btn-back" (click)="logout()">
+  <button mat-fab extended class="reh-btn-white" (click)="logout()">
     <mat-icon class="material-icons-outlined">logout</mat-icon>
     <span class="mat-subtitle-1">ออกจากระบบ</span> </button>
 

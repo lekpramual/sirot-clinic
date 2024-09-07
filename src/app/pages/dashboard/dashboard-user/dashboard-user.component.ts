@@ -13,6 +13,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule, _MatSlideToggleRequiredValidatorModule } from '@angular/material/slide-toggle';
 import { Observable, map, startWith } from 'rxjs';
+import {MatTabsModule} from '@angular/material/tabs';
 
 interface Employee {
   emp_id: number;
@@ -23,10 +24,10 @@ interface Employee {
 }
 
 @Component({
-  selector: 'app-user-form-create',
+  selector: 'app-dashboard-user',
   standalone: true,
-  templateUrl: './user-form-create.component.html',
-  styleUrl: './user-form-create.component.scss',
+  templateUrl: './dashboard-user.component.html',
+  styleUrl: './dashboard-user.component.scss',
   imports:[
     CommonModule,
     FormsModule,
@@ -42,10 +43,11 @@ interface Employee {
     MatRadioModule,
     MatIconModule,
     MatSlideToggleModule,
-    MatCardModule
+    MatCardModule,
+    MatTabsModule
   ]
 })
-export class UserFormComponent implements OnInit{
+export class DashboardUserComponent implements OnInit{
 
   sideCreate = signal(false);
 

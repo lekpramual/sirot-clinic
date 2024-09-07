@@ -23,10 +23,10 @@ interface Employee {
 }
 
 @Component({
-  selector: 'app-user-form-create',
+  selector: 'app-dashboard-form-create',
   standalone: true,
-  templateUrl: './user-form-create.component.html',
-  styleUrl: './user-form-create.component.scss',
+  templateUrl: './dashboard-form-create.component.html',
+  styleUrl: './dashboard-form-create.component.scss',
   imports:[
     CommonModule,
     FormsModule,
@@ -45,7 +45,7 @@ interface Employee {
     MatCardModule
   ]
 })
-export class UserFormComponent implements OnInit{
+export class DashboardFormComponent implements OnInit{
 
   sideCreate = signal(false);
 
