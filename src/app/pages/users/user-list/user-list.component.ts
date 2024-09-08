@@ -15,6 +15,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject } from 'rxjs';
 
 
+import { invoke } from '@tauri-apps/api/tauri';
+import { appWindow } from '@tauri-apps/api/window';
+
 export interface PeriodicElement {
   name: string;
   type:string;
@@ -68,6 +71,8 @@ const users:UserList[] = [
 
 export default class UserListComponent{
 
+  data: any;
+
   sideCreate = signal(false);
   searchValue = "";
   searchTerm = new Subject<string>();
@@ -91,13 +96,39 @@ export default class UserListComponent{
 
   displayedColumns = ['emp_code','emp_name','emp_tel', 'emp_role_name', 'emp_status_name','emp_date'];
 
-  // dataSource = UserData;
-
   dataSource!: MatTableDataSource<UserList>;
 
   constructor() {
     this.dataSource = new MatTableDataSource(users);
+
+
+    this.fetchData();
+    this.minimizeWindow();
   }
+
+
+  async fetchData() {
+    try {
+      this.data = await invoke('select_data_from_db');
+      console.log('Data received:', this.data);
+    } catch (error) {
+      console.error('Error fetching data from Tauri backend:', error);
+    }
+  }
+
+  async minimizeWindow() {
+    try {
+      await appWindow.minimize();
+    } catch (error) {
+      console.error('Error minimizing window:', error);
+    }
+  }
+
+  // async getApi(){
+  //   invoke('greet', { name: 'World' })
+  //   // `invoke` returns a Promise
+  //   .then((response) => console.log(response))
+  // }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;

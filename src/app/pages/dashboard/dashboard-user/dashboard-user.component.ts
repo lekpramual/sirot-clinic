@@ -14,6 +14,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule, _MatSlideToggleRequiredValidatorModule } from '@angular/material/slide-toggle';
 import { Observable, map, startWith } from 'rxjs';
 import {MatTabsModule} from '@angular/material/tabs';
+import { MatTableModule } from '@angular/material/table';
+import { MatRippleModule } from '@angular/material/core';
 
 interface Employee {
   emp_id: number;
@@ -44,7 +46,9 @@ interface Employee {
     MatIconModule,
     MatSlideToggleModule,
     MatCardModule,
-    MatTabsModule
+    MatTabsModule,
+    MatTableModule,
+    MatRippleModule
   ]
 })
 export class DashboardUserComponent implements OnInit{
@@ -58,6 +62,8 @@ export class DashboardUserComponent implements OnInit{
     emp_tel: '',
     emp_role_id:''
   })
+
+
 
 
 
@@ -90,7 +96,6 @@ export class DashboardUserComponent implements OnInit{
 
 
   departments = [
-
     { id: 2, name: 'เจ้าหน้าที่ IPD' },
     { id: 3, name: 'เจ้าหน้าที่ OPD' },
     { id: 4, name: 'ศูนย์ OPD' },
@@ -106,6 +111,14 @@ export class DashboardUserComponent implements OnInit{
 
   ];
 
+  ELEMENT_DATA = [
+    {date: '20 กันยายน 2567'},
+    {date: '10 เมษายน 2567'},
+    {date: '2 มีนาคม 2567'},
+    {date: '1 กุมภาพันธ์ 2567'},
+    {date: '1 มกราคม 2567'}
+  ];
+
   // Method to handle changes and emit the new value
   onMessageChange(newMessage: string) {
     this.messageChange.emit(newMessage);
@@ -119,6 +132,9 @@ export class DashboardUserComponent implements OnInit{
   searchControl: FormControl = new FormControl();
 
 
+  displayedColumns: string[] = ['date'];
+  dataSource = this.ELEMENT_DATA;
+
   constructor() {}
 
   ngOnInit(): void {
@@ -129,6 +145,9 @@ export class DashboardUserComponent implements OnInit{
       startWith(''),
       map(value => this._filter(value))
     );
+
+
+
   }
 
   async onSubmit() {

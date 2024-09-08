@@ -1,7 +1,11 @@
 @import '../../../../theme.scss';
 
+
+
 .example-container {
-  // height: calc(100vh - 236px);
+  height: 400px;
+  width: 550px;
+  max-width: 100%;
   overflow: auto;
 }
 
@@ -9,9 +13,9 @@ table.accept {
   width: 720px;
 }
 
-td.mat-column-star {
-  width: 20px;
-  padding-right: 8px;
+td.mat-column-actions {
+  width: 120px;
+
 }
 
 td.mat-column-type {

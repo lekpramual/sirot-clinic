@@ -1,10 +1,10 @@
 <!-- class="reh-form-sm" -->
-<mat-card>
+<mat-card >
 <mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
   <mat-tab >
     <ng-template mat-tab-label >
       <!-- <span class="mat-headline-5">ข้อมูลคนไข้</span> -->
-      <div class="row align-items-center px-2" style="height: 58px">
+      <div class="row align-items-center px-2" >
         <div class="col-12">
           <span class="mat-headline-5 reh-txt-blue900">ข้อมูลคนไข้</span>
         </div>
@@ -12,11 +12,18 @@
       </div>
     </ng-template>
 
-      <form [formGroup]="formGroupData" (ngSubmit)="onSubmit()">
+      <form [formGroup]="formGroupData"  (ngSubmit)="onSubmit()">
+        <div class="lj-container"  style="padding: 0px !important">
 
-        <div style="padding: 0px !important">
-
-            <section class="px-2 pt-3" tabindex="0">
+          <div class="row" >
+            <div class="col-12" align="right" style="margin-top: 8px;">
+              <button mat-fab extended class="reh-btn-green">
+                <mat-icon fontSet="material-icons-outlined">save</mat-icon>
+                <span class="mat-subtitle-2">บันทึกข้อมูลคนไข้</span>
+              </button>
+            </div>
+          </div>
+            <section class="lj-viewer-wrapper p-4 m-2" tabindex="0">
               <div class="row">
                 <div class="col-3">
                   <mat-form-field class="reh-input-full-width">
@@ -115,14 +122,7 @@
                   </mat-form-field>
                 </div>
               </div>
-              <div class="row mb-2">
-                <div class="col-12" align="right">
-                  <button mat-fab extended class="reh-btn-green">
-                    <mat-icon fontSet="material-icons-outlined">save</mat-icon>
-                    <span class="mat-subtitle-2">บันทึก</span>
-                  </button>
-                </div>
-              </div>
+
             </section>
         </div>
 
@@ -130,7 +130,7 @@
 
   </mat-tab>
   <mat-tab>
-    <ng-template mat-tab-label >
+    <ng-template mat-tab-label>
       <!-- <span class="mat-headline-5">ข้อมูลคนไข้</span> -->
       <div class="row align-items-center px-2" style="height: 58px">
         <div class="col-12">
@@ -139,8 +139,29 @@
 
       </div>
     </ng-template>
-    Content 2</mat-tab>
+    <section class="lj-container px-0" tabindex="1">
+      <div class="row" >
+        <div class="col-12" align="right" style="margin-top: 8px;">
+          <button mat-fab extended class="reh-btn-blue">
+            <mat-icon fontSet="material-icons-outlined">post_add</mat-icon>
+            <span class="mat-subtitle-2">ส่งตรวจคนไข้</span>
+          </button>
+        </div>
+      </div>
 
+      <section class="lj-viewer-wrapper p-4 m-2" tabindex="0">
+      <mat-table [dataSource]="dataSource" >
+        <ng-container matColumnDef="date">
+          <mat-header-cell mat-header-cell *matHeaderCellDef> วันที่ </mat-header-cell>
+          <mat-cell mat-cell *matCellDef="let element"> {{element.date}} </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row matRipple *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+    </section>
+      </section>
+  </mat-tab>
 </mat-tab-group>
 </mat-card>
 

@@ -1,6 +1,6 @@
-<mat-card>
+<mat-card >
   <div style="padding: 0px !important">
-    <div class="row align-items-center px-2">
+    <div class="row align-items-center px-2" style="height: 48px;">
       <div class="col-6">
         <span class="mat-headline-5 reh-txt-blue900">ตั้งค่า - เจ้าหน้าที่</span>
       </div>
@@ -12,6 +12,7 @@
       </div>
     </div>
     <mat-divider> </mat-divider>
+    <section class="lj-container" tabindex="0">
     <div class="row px-2 pt-3">
       <div class="col-12">
         <!-- class="reh-form-sm" -->
@@ -36,7 +37,6 @@
     </div>
     <div class="row">
       <div class="col-12">
-        <section class="example-container" tabindex="0">
           <table mat-table class="accept" [dataSource]="dataSource">
             <ng-container matColumnDef="emp_code">
               <th mat-header-cell *matHeaderCellDef>
@@ -128,8 +128,12 @@
               <td class="mat-cell" colspan="6">ไม่พบข้อมูลที่คุณ ค้นหา "{{input.value}}"</td>
             </tr>
           </table>
-        </section>
       </div>
     </div>
+
+    <div class="row">
+      <pre>{{ data | json }}</pre>
+    </div>
+    </section>
   </div>
 </mat-card>

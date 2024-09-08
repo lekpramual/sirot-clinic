@@ -5,7 +5,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 
-
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -18,10 +17,8 @@ import { AuthInterceptor } from './core/interceptors/auth.interceptor';
 })
 export class AppComponent {
   title = 'clinic-manager';
-   // Listen for window unload or tab close events
-  //  @HostListener('window:beforeunload', ['$event'])
-  //  clearSessionOnClose(event: BeforeUnloadEvent): void {
-  //    // Clear session storage
-  //    sessionStorage.clear();
-  //  }
+
+  constructor() {
+
+  }
 }

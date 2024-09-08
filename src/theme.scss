@@ -182,6 +182,11 @@ mat-sidenav-content {
   align-items: center;
 }
 
+.mat-mdc-cell{
+  border-bottom-color: #c4c6d0 !important;
+  border-bottom-width: 1px !important;
+  border-bottom-style: solid !important;
+}
 .mat-mdc-row .mat-mdc-cell {
   border-bottom: 1px solid transparent;
   border-top: 1px solid transparent;
@@ -190,7 +195,7 @@ mat-sidenav-content {
 
 .mat-mdc-row:hover .mat-mdc-cell {
   background-color: var(--background-color);
-  border-color: var(--green-color);
+  border-color: var(--blue-color);
 }
 
 .mat-select-search-input {
@@ -214,10 +219,25 @@ mat-sidenav-content {
   margin-bottom: 48px;
 }
 
-.mat-divider {
-  border-color: var(--blue900-color) !important;
-  border-top: 3px solid var(--blue900-color) !important;
-  height: 6px !important;
+// .mat-divider {
+//   border-color: var(--blue-color) !important;
+//   border-top: 3px solid var(--blue-color) !important;
+//   height: 8px !important;
+// }
+
+.mat-mdc-tab-label-container {
+  display: flex;
+  flex-grow: 1;
+  overflow: hidden;
+  z-index: 1;
+  border-bottom-style: solid;
+  border-bottom-width: 1px !important;
+  border-bottom-color: #e0e2ec !important;
 }
+
+.mat-mdc-mini-fab  {
+  border-radius: 12px !important;
+}
+
 
 

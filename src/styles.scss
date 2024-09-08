@@ -84,7 +84,7 @@ mat-mdc-list-item:focus {
   background-color: var(--green-color)!important;
   color: #fff !important;
   border-radius: 20px !important;
-  // height: 36px!important;
+  height: 42px!important;
   &.disabled {
     cursor: default;
     pointer-events: none;
@@ -97,7 +97,7 @@ mat-mdc-list-item:focus {
   background-color: var(--white-color)!important;
   color: #212529 !important;
   border-radius: 20px !important;
-  // height: 36px!important;
+  height: 42px!important;
   &.disabled {
     cursor: default;
     pointer-events: none;
@@ -110,7 +110,7 @@ mat-mdc-list-item:focus {
   background-color: var(--blue-color)!important;
   color: #fff !important;
   border-radius: 20px !important;
-  // height: 36px!important;
+  height: 42px!important;
   &.disabled {
     cursor: default;
     pointer-events: none;
@@ -123,7 +123,7 @@ mat-mdc-list-item:focus {
   background-color: var(--yellow-color)!important;
   color: #212529 !important;
   border-radius: 20px !important;
-  // height: 36px!important;
+  height: 42px!important;
 
   &.disabled {
     cursor: default;
@@ -137,7 +137,7 @@ mat-mdc-list-item:focus {
   background-color: var(--red-color)!important;
   color: #fff !important;
   border-radius: 20px !important;
-  // height: 36px!important;
+  height: 42px!important;
 }
 
 .reh-txt-blue {
@@ -247,6 +247,11 @@ mat-mdc-list-item:focus {
   margin-top: 0px !important;
   margin-left: 0px !important;
   margin-right: 0px !important;
+}
+
+.lj-container {
+  height: calc(100vh - 196px);
+  overflow: auto;
 }
 
 

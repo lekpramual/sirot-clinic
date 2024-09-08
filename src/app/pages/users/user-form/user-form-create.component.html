@@ -2,7 +2,7 @@
 <form [formGroup]="formGroupData" (ngSubmit)="onSubmit()">
   <mat-card>
     <div style="padding: 0px !important">
-      <div class="row align-items-center px-2" style="height: 56px">
+      <div class="row align-items-center px-2" style="height: 48px">
         <div class="col-3">
           <button
             mat-fab
@@ -34,7 +34,7 @@
         </div>
       </div>
       <mat-divider> </mat-divider>
-      <section class="form-container px-1" tabindex="0">
+      <section class="lj-container px-1" tabindex="0">
         <section tabindex="0">
           <div class="lj-viewer-wrapper p-2">
             <div class="row mb-2">
@@ -226,7 +226,7 @@
               </div>
             </div>
 
-            <div class="row mt-3 justify-content-center">
+            <div class="row" style="margin-top:8px !important">
               <div class="col-6">
                 <mat-form-field class="reh-input-full-width">
                   <mat-label>ชื่อผู้ใช้งาน</mat-label>
@@ -248,8 +248,6 @@
                   >
                 </mat-form-field>
               </div>
-            </div>
-            <div class="row justify-content-center">
               <div class="col-6">
                 <mat-form-field class="reh-input-full-width">
                   <mat-label>รหัสผ่าน</mat-label>
@@ -272,6 +270,7 @@
                 </mat-form-field>
               </div>
             </div>
+
           </div>
         </section>
       </section>

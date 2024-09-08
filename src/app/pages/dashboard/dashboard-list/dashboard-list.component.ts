@@ -32,15 +32,12 @@ export interface UserList {
   emp_name:string;
   emp_tel:string;
   emp_date:string;
-  emp_role_id:number;
-  emp_role_name:string;
-  emp_status_id:number;
-  emp_status_name:string;
+
 }
 
 const users:UserList[] = [
-  {emp_id:1,emp_code:'EMP-00001',emp_name:'นายทดสอบ ทดสอบ',emp_tel:'0832549551',emp_role_id:1,emp_role_name:'ผู้ดูแลระบบ',emp_status_id:1,emp_status_name:'ใช้งาน',emp_date:'23 ส.ค. 2567'},
-  {emp_id:2,emp_code:'EMP-00002',emp_name:'นายทดสอบ2 ทดสอบ2',emp_tel:'0832512345',emp_role_id:2,emp_role_name:'ผู้ดูแลระบบ',emp_status_id:1,emp_status_name:'ใช้งาน',emp_date:'23 ส.ค. 2567'}
+  {emp_id:1,emp_code:'HN00001',emp_name:'นายทดสอบ ทดสอบ',emp_tel:'0832549551',emp_date:'23 ส.ค. 2567'},
+  {emp_id:2,emp_code:'HN00002',emp_name:'นายทดสอบ2 ทดสอบ2',emp_tel:'0832512345',emp_date:'23 ส.ค. 2567'}
 ]
 
 
@@ -89,7 +86,7 @@ export default class DashboardListComponent{
     //  this.sideCreate.set(true)
    }
 
-  displayedColumns = ['emp_code','emp_name','emp_tel', 'emp_role_name', 'emp_status_name','emp_date'];
+  displayedColumns = ['emp_code','emp_name','emp_tel','emp_date','actions'];
 
   // dataSource = UserData;
 
