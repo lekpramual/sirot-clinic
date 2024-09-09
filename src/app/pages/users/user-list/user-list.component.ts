@@ -109,10 +109,13 @@ export default class UserListComponent{
 
   async fetchData() {
     try {
-      this.data = await invoke('select_data_from_db');
-      console.log('Data received:', this.data);
+      const result = await invoke('connect_to_mysql');
+      console.log('Data fetched from database:', result);
+      this.data = result;
+      return this.data;
     } catch (error) {
-      console.error('Error fetching data from Tauri backend:', error);
+      console.error('Error fetching data:', error);
+      throw error;
     }
   }
 
