@@ -12,15 +12,10 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule, _MatSlideToggleRequiredValidatorModule } from '@angular/material/slide-toggle';
+import { TUser } from '@core/interfaces/user.interfaces';
 import { Observable, map, startWith } from 'rxjs';
 
-interface Employee {
-  emp_id: number;
-  emp_code: string;
-  emp_name: string;
-  emp_tel: string;
-  emp_role_id: '';
-}
+import { invoke } from '@tauri-apps/api/tauri';
 
 @Component({
   selector: 'app-user-form-create',
@@ -48,10 +43,12 @@ interface Employee {
 export class UserFormComponent implements OnInit{
 
   sideCreate = signal(false);
+  idUser = signal(0);
+  data:any;
 
-  formDataSignal:WritableSignal<Employee> = signal({
-    emp_id: 0,
-    emp_code: '',
+  formDataSignal:WritableSignal<any> = signal({
+    user_id: 0,
+    user_fullname: '',
     emp_name: '',
     emp_tel: '',
     emp_role_id:''
@@ -63,23 +60,11 @@ export class UserFormComponent implements OnInit{
 
     this.sideCreate.set(val)
   }
-  @Input() set formdata(val:any){
+  @Input() set userId(val:any){
     console.log(val);
+    this.idUser.set(val);
 
-    this.formDataSignal.update(emp => ({
-      ...emp,
-      emp_id: val.emp_id,
-      emp_code: val.emp_code,
-      emp_name:val.emp_name,
-      emp_tel:val.emp_tel,
-      emp_role_id:val.emp_role_id
-    }));
-
-    // this.formData.set({
-    //   data: {
-    //     emp_id: val.data.emp_id
-    //   }
-    // })
+    this.fetchData(val);
     this.initForm();
   }
 
@@ -123,10 +108,7 @@ export class UserFormComponent implements OnInit{
     // this.accessibleId = '';
     // this.initForm();
 
-    this.filteredOptions = this.searchControl.valueChanges.pipe(
-      startWith(''),
-      map(value => this._filter(value))
-    );
+
   }
 
   async onSubmit() {
@@ -168,9 +150,19 @@ export class UserFormComponent implements OnInit{
 
   }
 
-  private _filter(value: string): any[] {
-    const filterValue = value.toLowerCase();
-    return this.options.filter(option => option.name.toLowerCase().includes(filterValue));
+
+  async fetchData(userId:number) {
+    try {
+      const result = await invoke('read_user_id',{userId:userId});
+      console.log('Data fetched from database:', result);
+      this.data = result;
+      // return this.data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      throw error;
+    } finally {
+      console.log('Loading success....')
+    }
   }
 
 

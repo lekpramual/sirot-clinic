@@ -4,7 +4,7 @@
   </div>
   @if(isOpened()){
     <div  class="col-lg-6 col-md-12">
-      <app-user-form-create [sideopen]="isOpened()" [formdata]="formData()" (messageChange)="onMessageChange($event)"   />
+      <app-user-form-create [sideopen]="isOpened()" [userId]="userId()" (messageChange)="onMessageChange($event)"   />
     </div>
   }
 </div>

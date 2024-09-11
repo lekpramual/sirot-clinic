@@ -16,9 +16,9 @@
           </button>
         </div>
         <div class="col-6" align="center">
-          @if(formDataSignal().emp_id != 0){
+          @if(idUser() != 0){
           <span class="mat-headline-5 reh-txt-blue900"
-            >เจ้าหน้าที่ : {{ formDataSignal().emp_code }}</span
+            >เจ้าหน้าที่ : {{ idUser() }}</span
           >
           }@else {
           <span class="mat-headline-5 reh-txt-blue900"
@@ -268,6 +268,14 @@
                     *โปรดระบุ รหัสผ่าน</mat-error
                   >
                 </mat-form-field>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12">
+                <pre>
+                  {{data | json}}
+                </pre>
               </div>
             </div>
 

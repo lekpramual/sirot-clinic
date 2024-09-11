@@ -1,15 +1,9 @@
 import { Component, WritableSignal, signal } from '@angular/core';
 import { UserFormComponent } from './user-form/user-form-create.component';
 import UserListComponent from './user-list/user-list.component';
+import { TUser } from '@core/interfaces/user.interfaces';
+import { single } from 'rxjs';
 
-
-interface Employee {
-  emp_id: number;
-  emp_code: string;
-  emp_name: string;
-  emp_tel: string;
-  emp_role_id: string;
-}
 
 @Component({
   selector: 'app-users',
@@ -25,14 +19,8 @@ export default class UsersComponent {
 
   // defualt false
   isOpened = signal(true);
+  userId = signal(0);
 
-  formData:WritableSignal<Employee> = signal({
-    emp_id: 0,
-    emp_code: '',
-    emp_name: '',
-    emp_tel:'',
-    emp_role_id:''
-  })
 
   openSide(){
     this.isOpened.set(!this.isOpened)
@@ -50,24 +38,12 @@ export default class UsersComponent {
   }
 
   onFormData($event:any){
-    this.formData.update(emp => ({
-      ...emp,
-      emp_id: $event.emp_id,
-      emp_code: $event.emp_code,
-      emp_name:$event.emp_name,
-      emp_tel:$event.emp_tel,
-      emp_role_id:$event.emp_role_id,
-    }));
+    console.log($event)
+    this.userId.set($event);
   }
 
   resetEmployeeData() {
-    this.formData.set({
-      emp_id: 0,
-      emp_code: '',
-      emp_name: '',
-      emp_tel:'',
-      emp_role_id:'',
-    });
+    this.userId.set(0);
   }
 
 }
