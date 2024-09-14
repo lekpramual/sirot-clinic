@@ -49,9 +49,9 @@ export class UserFormComponent implements OnInit{
   formDataSignal:WritableSignal<any> = signal({
     user_id: 0,
     user_fullname: '',
-    emp_name: '',
-    emp_tel: '',
-    emp_role_id:''
+    user_name: '',
+    user_tel: '',
+    user_role_id:''
   })
 
 
@@ -70,25 +70,6 @@ export class UserFormComponent implements OnInit{
 
   // Output property to send data back to the parent
   @Output() messageChange = new EventEmitter<string>();
-
-
-  departments = [
-
-    { id: 2, name: 'เจ้าหน้าที่ IPD' },
-    { id: 3, name: 'เจ้าหน้าที่ OPD' },
-    { id: 4, name: 'ศูนย์ OPD' },
-    { id: 5, name: 'ศูนย์ IPD' },
-  ];
-
-  options: any[] = [
-    {name: 'หน่วยงาน 1', id: 1},
-    {name: 'หน่วยงาน 2', id: 2},
-    {name: 'หน่วยงาน 3', id: 3},
-    {name: 'หน่วยงาน 4', id: 4},
-    {name: 'หน่วยงาน 5', id: 5}
-
-  ];
-
   // Method to handle changes and emit the new value
   onMessageChange(newMessage: string) {
     this.messageChange.emit(newMessage);
@@ -116,8 +97,17 @@ export class UserFormComponent implements OnInit{
     if (this.formGroupData.valid) {
       // Handle form submission
       try {
-        const data: any = {};
-        data.name = this.formGroupData.value.emp_name;
+        console.log(this.formGroupData.value);
+
+        let userTitle = this.formGroupData.value.user_title;
+        let userFname = this.formGroupData.value.user_fname;
+        let userLname = this.formGroupData.value.user_lname;
+        let userPosition = this.formGroupData.value.user_position;
+        let userUsername = this.formGroupData.value.user_username;
+        let userPassword = this.formGroupData.value.user_password;
+
+        const result = await invoke('create_and_update_item',{userTitle,userFname,userLname,userPosition,userUsername,userPassword});
+        console.log(result);
       } catch (error: any) {
         // Handle error during form submission
         console.error(error);
@@ -129,20 +119,15 @@ export class UserFormComponent implements OnInit{
   }
 
   initForm() {
-    console.log('Loadding ...',this.formDataSignal()?.emp_name)
+    console.log('Loadding ...')
     // choice_depart choice_stamp
     this.formGroupData = new FormGroup({
-      emp_title: new FormControl(this.formDataSignal()?.emp_name, [Validators.required]),
-      emp_firstname: new FormControl(this.formDataSignal()?.emp_name, [Validators.required]),
-      emp_surname: new FormControl(this.formDataSignal()?.emp_name, [Validators.required]),
-      emp_name: new FormControl(this.formDataSignal()?.emp_name, [Validators.required]),
-      emp_tel: new FormControl(this.formDataSignal()?.emp_tel,[]),
-      emp_depart: new FormControl(null,[Validators.required]),
-      emp_position: new FormControl(''),
-      emp_role_id: new FormControl(this.formDataSignal()?.emp_role_id,[Validators.required]),
-      emp_status: new FormControl(false,[Validators.required]),
-      emp_user: new FormControl('',[Validators.required]),
-      emp_pass: new FormControl('',[Validators.required]),
+      user_title: new FormControl('', [Validators.required]),
+      user_fname: new FormControl('', [Validators.required]),
+      user_lname: new FormControl('', [Validators.required]),
+      user_position: new FormControl(''),
+      user_username: new FormControl('',[Validators.required]),
+      user_password: new FormControl('',[Validators.required]),
     });
   }
 

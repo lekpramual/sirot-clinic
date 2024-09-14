@@ -51,15 +51,15 @@
                   <mat-label>คำนำหน้า</mat-label>
                   <input
                     matInput
-                    name="emp_title"
-                    formControlName="emp_title"
+                    name="user_title"
+                    formControlName="user_title"
                     required
                   />
 
                   <mat-error
                     *ngIf="
-                      formGroupData.get('emp_title')?.invalid ||
-                      formGroupData.get('emp_title')?.touched
+                      formGroupData.get('user_title')?.invalid ||
+                      formGroupData.get('user_title')?.touched
                     "
                   >
                     *โปรดระบุ คำนำหน้า</mat-error
@@ -71,15 +71,15 @@
                   <mat-label>ชื่อ</mat-label>
                   <input
                     matInput
-                    name="emp_firstname"
-                    formControlName="emp_firstname"
+                    name="user_fname"
+                    formControlName="user_fname"
                     required
                   />
 
                   <mat-error
                     *ngIf="
-                      formGroupData.get('emp_firstname')?.invalid ||
-                      formGroupData.get('emp_firstname')?.touched
+                      formGroupData.get('user_fname')?.invalid ||
+                      formGroupData.get('user_fname')?.touched
                     "
                   >
                     *โปรดระบุ ชื่อ</mat-error
@@ -91,15 +91,15 @@
                   <mat-label>นามสกุล</mat-label>
                   <input
                     matInput
-                    name="emp_surname"
-                    formControlName="emp_surname"
+                    name="user_lname"
+                    formControlName="user_lname"
                     required
                   />
 
                   <mat-error
                     *ngIf="
-                      formGroupData.get('emp_surname')?.invalid ||
-                      formGroupData.get('emp_surname')?.touched
+                      formGroupData.get('user_lname')?.invalid ||
+                      formGroupData.get('user_lname')?.touched
                     "
                   >
                     *โปรดระบุ นามสกุล</mat-error
@@ -107,114 +107,25 @@
                 </mat-form-field>
               </div>
             </div>
+
             <div class="row">
-              <div class="col-6">
+              <div class="col-12">
                 <mat-form-field class="reh-input-full-width">
-                  <mat-label>เบอร์</mat-label>
+                  <mat-label>ตำแหน่ง</mat-label>
                   <input
+
                     matInput
-                    name="emp_tel"
-                    placeholder="เบอร์"
-                    formControlName="emp_tel"
+                    name="user_position"
+                    placeholder="ตำแหน่ง"
+                    formControlName="user_position"
+
                   />
+
+
                 </mat-form-field>
               </div>
-
-              <div class="col-6">
-                <mat-form-field class="reh-input-full-width">
-                  <mat-label>เลือก ประเภทเจ้าหน้าที่</mat-label>
-                  <mat-select formControlName="emp_role_id" required>
-                    <mat-option
-                      *ngFor="let dept of departments"
-                      [value]="dept.id"
-                    >
-                      {{ dept.name }}
-                    </mat-option>
-                  </mat-select>
-
-                  <mat-error
-                    *ngIf="
-                      formGroupData.get('emp_role_id')?.invalid ||
-                      formGroupData.get('emp_role_id')?.touched
-                    "
-                  >
-                    *โปรดเลือก ประเภทเจ้าหน้าที่</mat-error
-                  >
-                </mat-form-field>
-              </div>
-            </div>
+            </div>`
           </div>
-          <!-- <div class="row">
-            <div class="col-8">
-              <mat-form-field class="reh-input-full-width">
-                <mat-label>ตำแหน่ง</mat-label>
-                <input
-
-                  matInput
-                  name="emp_position"
-                  placeholder="ตำแหน่ง"
-                  formControlName="emp_position"
-
-                />
-
-
-              </mat-form-field>
-            </div>
-          </div> -->
-
-          <!-- <div class="row">
-            <div class="col-8 text-center">
-              <mat-form-field class="reh-input-full-width mt-2">
-                <mat-label>เลือก หน่วยงาน</mat-label>
-
-                <mat-select formControlName="emp_depart">
-                  <mat-option>
-                    <ngx-mat-select-search
-                      [formControl]="searchControl"
-                      placeholderLabel="ค้นหา หน่วยงาน"
-                      [preventHomeEndKeyPropagation]="true"
-
-                    >
-
-                        <span  ngxMatSelectNoEntriesFound>
-                          ไม่พบข้อมูล
-                        </span>
-
-
-                  </ngx-mat-select-search>
-                </mat-option>
-                @for (option of filteredOptions | async; track option) {
-                  <mat-option  [value]="option.id"> {{ option.name }}</mat-option>
-                }
-
-                </mat-select>
-
-                <mat-error
-                  *ngIf="
-                    formGroupData.get('emp_depart')?.invalid ||
-                    formGroupData.get('emp_depart')?.touched
-                  "
-                >
-                  *โปรดเลือก หน่วยงาน</mat-error
-                >
-              </mat-form-field>
-
-
-            </div>
-          </div> -->
-
-          <!-- <div class="row">
-            <div class="col-12">
-              <mat-label>สถานะ</mat-label>
-              <mat-slide-toggle color="primary" formControlName="emp_status">
-                @if(formGroupData.get('emp_status')?.value){
-                  <span class="reh-txt-green">ใช้งาน</span>
-                }@else {
-                  <span class="reh-txt-red">ยกเลิก</span>
-                }
-              </mat-slide-toggle>
-            </div>
-          </div> -->
 
           <div class="lj-viewer-wrapper p-2">
             <div class="row g-3">
@@ -232,16 +143,16 @@
                   <mat-label>ชื่อผู้ใช้งาน</mat-label>
                   <input
                     matInput
-                    name="emp_user"
+                    name="user_username"
                     placeholder="ชื่อผู้ใช้งาน"
-                    formControlName="emp_user"
+                    formControlName="user_username"
                     required
                   />
 
                   <mat-error
                     *ngIf="
-                      formGroupData.get('emp_user')?.invalid ||
-                      formGroupData.get('emp_user')?.touched
+                      formGroupData.get('user_username')?.invalid ||
+                      formGroupData.get('user_username')?.touched
                     "
                   >
                     *โปรดระบุ ชื่อผู้ใช้งาน</mat-error
@@ -253,16 +164,16 @@
                   <mat-label>รหัสผ่าน</mat-label>
                   <input
                     matInput
-                    name="emp_pass"
+                    name="user_password"
                     placeholder="รหัสผ่าน"
-                    formControlName="emp_pass"
+                    formControlName="user_password"
                     required
                   />
 
                   <mat-error
                     *ngIf="
-                      formGroupData.get('emp_pass')?.invalid ||
-                      formGroupData.get('emp_pass')?.touched
+                      formGroupData.get('user_password')?.invalid ||
+                      formGroupData.get('user_password')?.touched
                     "
                   >
                     *โปรดระบุ รหัสผ่าน</mat-error

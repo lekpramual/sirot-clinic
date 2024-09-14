@@ -30,8 +30,49 @@ struct UserByID {
     user_username:String
 }
 
+
 // type user_code = String;
 
+
+#[command]
+async fn create_and_update_item(
+  user_title:String,
+  user_fname:String,
+  user_lname:String,
+  user_position:String,
+  user_username:String,
+  user_password:String
+) -> Result<(), String> {
+
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+        Ok(conn) => conn,
+        Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+    };
+
+    let user = match conn.exec_drop(
+        "INSERT INTO users (user_title, user_fname, user_lname,user_position,user_username,user_password, user_created, user_updated)
+         VALUES (:user_title, :user_fname, :user_lname, :user_position, :user_username, :user_password , NOW(), NOW())",
+        params! {
+            "user_title" => user_title,
+            "user_fname" => user_fname,
+            "user_lname" => user_lname,
+            "user_position" => user_position,
+            "user_username" => user_username,
+            "user_password" => user_password
+        }
+    ){
+        Ok(user) => user,
+        Err(err) => return Err(format!("Failed to execute query: {}", err)),
+    };
+
+    // Retrieve the last inserted ID
+    // let last_id = conn.last_insert_id();
+
+    // println!('last_id',last_id);
+     // Return the ID of the inserted and updated item
+    Ok(())
+}
 
 #[command]
 async fn connect_to_mysql() -> Result<Pool, String> {
@@ -80,31 +121,8 @@ async fn read_users() -> Result<Vec<User>, String> {
 }
 
 
-// #[command]
-// async fn read_user_id(user_id: u32) -> Result<Option<User>, String> {
-
-//     let pool = connect_to_mysql().await?;
-//     let mut conn = match pool.get_conn() {
-//         Ok(conn) => conn,
-//         Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
-//     };
-
-
-//     // TODO
-//     let user: Option<User> = match conn.exec_first(
-//       "SELECT user_id, user_code, CONCAT(user_title,user_fname,' ',user_lname) AS user_fullname,user_position,user_status FROM users WHERE user_id = :id",
-//       params!{"id" => user_id}
-//     ){
-//         Ok(user) => user,
-//         Err(err) => return Err(format!("Failed to execute query: {}", err)),
-//     };
-
-//     Ok(user)
-// }
-
 #[command]
 async fn read_user_id(user_id: u32) -> Result<Option<UserByID>,String> {
-
   // println!("User ID: {}", user_id);
     let pool = connect_to_mysql().await?;
     let mut conn = match pool.get_conn() {
@@ -127,7 +145,7 @@ async fn read_user_id(user_id: u32) -> Result<Option<UserByID>,String> {
 
 fn main() {
   tauri::Builder::default()
-    .invoke_handler(tauri::generate_handler![read_users,read_user_id])
+    .invoke_handler(tauri::generate_handler![read_users,read_user_id,create_and_update_item])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");
 }
