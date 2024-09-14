@@ -18,11 +18,11 @@ import { MatTableModule } from '@angular/material/table';
 import { MatRippleModule } from '@angular/material/core';
 
 interface Employee {
-  emp_id: number;
-  emp_code: string;
-  emp_name: string;
-  emp_tel: string;
-  emp_role_id: '';
+  patient_id: number;
+  patient_code: string;
+  patient_name: string;
+  patient_tel: string;
+  patient_role_id: '';
 }
 
 @Component({
@@ -56,11 +56,11 @@ export class DashboardUserComponent implements OnInit{
   sideCreate = signal(false);
 
   formDataSignal:WritableSignal<Employee> = signal({
-    emp_id: 0,
-    emp_code: '',
-    emp_name: '',
-    emp_tel: '',
-    emp_role_id:''
+    patient_id: 0,
+    patient_code: '',
+    patient_name: '',
+    patient_tel: '',
+    patient_role_id:''
   })
 
 
@@ -76,16 +76,16 @@ export class DashboardUserComponent implements OnInit{
 
     this.formDataSignal.update(emp => ({
       ...emp,
-      emp_id: val.emp_id,
-      emp_code: val.emp_code,
-      emp_name:val.emp_name,
-      emp_tel:val.emp_tel,
-      emp_role_id:val.emp_role_id
+      patient_id: val.patient_id,
+      patient_code: val.patient_code,
+      patient_name:val.patient_name,
+      patient_tel:val.patient_tel,
+      patient_role_id:val.patient_role_id
     }));
 
     // this.formData.set({
     //   data: {
-    //     emp_id: val.data.emp_id
+    //     patient_id: val.data.patient_id
     //   }
     // })
     this.initForm();
@@ -156,7 +156,7 @@ export class DashboardUserComponent implements OnInit{
       // Handle form submission
       try {
         const data: any = {};
-        data.name = this.formGroupData.value.emp_name;
+        data.name = this.formGroupData.value.patient_name;
       } catch (error: any) {
         // Handle error during form submission
         console.error(error);
@@ -168,20 +168,21 @@ export class DashboardUserComponent implements OnInit{
   }
 
   initForm() {
-    console.log('Loadding ...',this.formDataSignal()?.emp_name)
+    console.log('Loadding ...',this.formDataSignal()?.patient_name)
     // choice_depart choice_stamp
     this.formGroupData = new FormGroup({
-      emp_title: new FormControl(this.formDataSignal()?.emp_name, [Validators.required]),
-      emp_firstname: new FormControl(this.formDataSignal()?.emp_name, [Validators.required]),
-      emp_surname: new FormControl(this.formDataSignal()?.emp_name, [Validators.required]),
-      emp_name: new FormControl(this.formDataSignal()?.emp_name, [Validators.required]),
-      emp_tel: new FormControl(this.formDataSignal()?.emp_tel,[]),
-      emp_depart: new FormControl(null,[Validators.required]),
-      emp_position: new FormControl(''),
-      emp_role_id: new FormControl(this.formDataSignal()?.emp_role_id,[Validators.required]),
-      emp_status: new FormControl(false,[Validators.required]),
-      emp_user: new FormControl('',[Validators.required]),
-      emp_pass: new FormControl('',[Validators.required]),
+      patient_title: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
+      patient_firstname: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
+      patient_surname: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
+      patient_name: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
+      patient_tel: new FormControl(this.formDataSignal()?.patient_tel,[]),
+      patient_depart: new FormControl(null,[Validators.required]),
+      patient_cid: new FormControl(''),
+      patient_addr: new FormControl(''),
+      patient_role_id: new FormControl(this.formDataSignal()?.patient_role_id,[Validators.required]),
+      patient_status: new FormControl(false,[Validators.required]),
+      patient_user: new FormControl('',[Validators.required]),
+      patient_pass: new FormControl('',[Validators.required]),
     });
   }
 

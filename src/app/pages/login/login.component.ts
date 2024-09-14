@@ -30,6 +30,7 @@ import {
 } from '@angular/platform-browser/animations';
 import { BrowserModule } from '@angular/platform-browser';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -62,7 +63,7 @@ export class LoginComponent implements OnInit {
 
   formInitial!: FormGroup;
 
-  constructor(private _snackBar: MatSnackBar, private router: Router) {}
+  constructor(private _snackBar: MatSnackBar, private router: Router,private _authService:AuthService ) {}
 
   ngOnInit(): void {
     this.initForm();
@@ -74,7 +75,9 @@ export class LoginComponent implements OnInit {
       try {
         const username = this.formInitial.controls['username'].value;
         const password = this.formInitial.controls['password'].value;
-        if (username === 'admin' && password === 'abc123==') {
+
+        const result = await this._authService.loginUser(username,password);
+        if (result === 'success') {
           sessionStorage.setItem('authToken', username);
           this._snackBar.open(`ยินดีต้อนรับเข้าสู่ระบบ`, '', {
             duration:1500,

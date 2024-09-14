@@ -1,6 +1,7 @@
 <div class="row px-0 mx-0 mt-0 g-3">
   <div [class]="isOpened()?'col-lg-6 col-md-12':'col-lg-12 col-md-12' ">
-    <app-user-list [sideopen]="isOpened()" (messageChange)="onMessageChange($event)" (formChange)="onFormData($event)"/>
+    <app-user-list [dataUser]="data" [sideopen]="isOpened()" (messageChange)="onMessageChange($event)" (formChange)="onFormData($event)"/>
+    <!-- {{data | json}} -->
   </div>
   @if(isOpened()){
     <div  class="col-lg-6 col-md-12">

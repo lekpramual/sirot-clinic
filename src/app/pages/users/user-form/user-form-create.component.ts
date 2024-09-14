@@ -15,7 +15,11 @@ import { MatSlideToggleModule, _MatSlideToggleRequiredValidatorModule } from '@a
 import { TUser } from '@core/interfaces/user.interfaces';
 import { Observable, map, startWith } from 'rxjs';
 
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+
+
 import { invoke } from '@tauri-apps/api/tauri';
+import { UserService } from '@core/services/user.service';
 
 @Component({
   selector: 'app-user-form-create',
@@ -37,23 +41,16 @@ import { invoke } from '@tauri-apps/api/tauri';
     MatRadioModule,
     MatIconModule,
     MatSlideToggleModule,
-    MatCardModule
+    MatCardModule,
+    MatSnackBarModule
   ]
 })
 export class UserFormComponent implements OnInit{
 
   sideCreate = signal(false);
   idUser = signal(0);
+  codeUser = signal('');
   data:any;
-
-  formDataSignal:WritableSignal<any> = signal({
-    user_id: 0,
-    user_fullname: '',
-    user_name: '',
-    user_tel: '',
-    user_role_id:''
-  })
-
 
 
   @Input() set sideopen(val:boolean){
@@ -61,10 +58,16 @@ export class UserFormComponent implements OnInit{
     this.sideCreate.set(val)
   }
   @Input() set userId(val:any){
+
     console.log(val);
     this.idUser.set(val);
 
-    this.fetchData(val);
+    if(this.idUser() != 0){
+      console.log('is not 0');
+      this.fetchData(val);
+      // this.updateForm(result);
+    }
+    // this.fetchData(val);
     this.initForm();
   }
 
@@ -83,12 +86,9 @@ export class UserFormComponent implements OnInit{
   searchControl: FormControl = new FormControl();
 
 
-  constructor() {}
+  constructor(private _snackBar: MatSnackBar,private _userService: UserService) {}
 
-  ngOnInit(): void {
-    // this.accessibleId = '';
-    // this.initForm();
-
+  async ngOnInit() {
 
   }
 
@@ -98,7 +98,7 @@ export class UserFormComponent implements OnInit{
       // Handle form submission
       try {
         console.log(this.formGroupData.value);
-
+        let userId = this.idUser();
         let userTitle = this.formGroupData.value.user_title;
         let userFname = this.formGroupData.value.user_fname;
         let userLname = this.formGroupData.value.user_lname;
@@ -106,8 +106,44 @@ export class UserFormComponent implements OnInit{
         let userUsername = this.formGroupData.value.user_username;
         let userPassword = this.formGroupData.value.user_password;
 
-        const result = await invoke('create_and_update_item',{userTitle,userFname,userLname,userPosition,userUsername,userPassword});
-        console.log(result);
+        try {
+          if(userId != 0){
+            const result = await this._userService.updateUserById(userId,userTitle,userFname,userLname,userPosition,userUsername,userPassword);
+            if(result === 'ok'){
+              this._snackBar.open(`ปรับปรุงข้อมูลเรียบร้อย`, '', {
+                duration:1500,
+                horizontalPosition: 'center',
+                verticalPosition: 'bottom',
+                panelClass:['success-snackbar']
+              }).afterDismissed().subscribe(() => {
+                this.onMessageChange('close');
+              });
+            }
+          }else{
+            const result = await this._userService.createUser(userTitle,userFname,userLname,userPosition,userUsername,userPassword);
+            if(result === 'ok'){
+              this._snackBar.open(`บันทึกข้อมูลเรียบร้อย`, '', {
+                duration:1500,
+                horizontalPosition: 'center',
+                verticalPosition: 'bottom',
+                panelClass:['success-snackbar']
+              }).afterDismissed().subscribe(() => {
+                this.onMessageChange('close');
+              });
+            }
+          }
+
+        } catch (error) {
+          this._snackBar.open('ชื่อผู้ใช้งาน หรือ รหัสผ่าน ไม่ถูกต้อง', '', {
+            duration:3000,
+            horizontalPosition: 'center',
+            verticalPosition: 'bottom',
+            panelClass:['error-snackbar']
+          }).afterDismissed().subscribe(() => {
+            this.initForm();
+          });
+        }
+
       } catch (error: any) {
         // Handle error during form submission
         console.error(error);
@@ -119,7 +155,6 @@ export class UserFormComponent implements OnInit{
   }
 
   initForm() {
-    console.log('Loadding ...')
     // choice_depart choice_stamp
     this.formGroupData = new FormGroup({
       user_title: new FormControl('', [Validators.required]),
@@ -131,16 +166,29 @@ export class UserFormComponent implements OnInit{
     });
   }
 
-  onNoClick(): void {
+  updateForm(data:any) {
+    console.log(data);
+    this.codeUser.set(data.user_code);
+    this.formGroupData.patchValue({
+      user_title:data.user_title,
+      user_fname:data.user_fname,
+      user_lname:data.user_lname,
+      user_position:data.user_position,
+      user_username:data.user_username,
+      user_password:""
+    });
+
+    this.formGroupData.controls["user_password"].clearValidators();
+    this.formGroupData.controls["user_password"].updateValueAndValidity();
 
   }
 
 
   async fetchData(userId:number) {
     try {
-      const result = await invoke('read_user_id',{userId:userId});
-      console.log('Data fetched from database:', result);
+      const result = await this._userService.readUserById(userId);
       this.data = result;
+      this.updateForm(result);
       // return this.data;
     } catch (error) {
       console.error('Error fetching data:', error);

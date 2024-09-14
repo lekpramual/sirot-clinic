@@ -1,5 +1,4 @@
 import { Component, WritableSignal, signal } from '@angular/core';
-import { DashboardFormComponent } from './dashboard-form/dashboard-form-create.component';
 import DashboardListComponent from './dashboard-list/dashboard-list.component';
 import { DashboardUserComponent } from "./dashboard-user/dashboard-user.component";
 
@@ -19,7 +18,6 @@ interface Employee {
   styleUrl: './dashboard.component.scss',
   imports: [
     DashboardListComponent,
-    DashboardFormComponent,
     DashboardUserComponent
 ]
 })

@@ -15,7 +15,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { Subject } from 'rxjs';
 
 
-import { invoke } from '@tauri-apps/api/tauri';
 import { appWindow } from '@tauri-apps/api/window';
 import { TUser } from '@core/interfaces/user.interfaces';
 
@@ -44,7 +43,7 @@ import { TUser } from '@core/interfaces/user.interfaces';
 
 export default class UserListComponent{
 
-  data: any;
+  _data: any;
 
   sideCreate = signal(false);
   searchValue = "";
@@ -52,6 +51,10 @@ export default class UserListComponent{
 
   @Input() set sideopen(val:boolean){
     this.sideCreate.set(val)
+  }
+  @Input() set dataUser(val:any){
+    // this._data = val;
+    this.dataSource.data = val;
   }
 
    // Output property to send data back to the parent
@@ -75,34 +78,16 @@ export default class UserListComponent{
     // this.dataSource = new MatTableDataSource(users);
 
 
-    this.fetchData();
-    this.minimizeWindow();
+    // this.fetchData();
+    // this.minimizeWindow();
   }
 
 
   async fetchData() {
-    try {
-      const result = await invoke('read_users');
-      console.log('Data fetched from database:', result);
-      this.data = result;
-      // return this.data;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    } finally {
-      console.log('Loading success....')
-    }
-
-    this.dataSource.data = this.data;
+    this.dataSource.data = this._data;
   }
 
-  async minimizeWindow() {
-    try {
-      await appWindow.minimize();
-    } catch (error) {
-      console.error('Error minimizing window:', error);
-    }
-  }
+
 
   // async getApi(){
   //   invoke('greet', { name: 'World' })
