@@ -15,4 +15,13 @@ export class AuthService {
       throw error;
     }
   }
+
+  async getUserId(){
+    try {
+      return await sessionStorage.getItem('authToken');
+    } catch (error) {
+      console.error("Error read users:", error);
+      throw error;
+    }
+  }
 }

@@ -243,7 +243,40 @@ async fn update_user_id(
 }
 
 #[command]
-async fn login_user(user_username: String, user_password: String) -> Result<String,String> {
+async fn login_user(user_username: String, user_password: String) -> Result<u32,String> {
+  // println!("User ID: {}", user_id);
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+              Ok(conn) => conn,
+              Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+          };
+
+     // Create an MD5 hash of the password
+     let hash = md5::compute(user_password);
+     // Convert the hash to a hex string and return it
+     let _hashPassword = format!("{:x}", hash);
+
+    let user: Option<(u32, String, String)> = match conn.exec_first(
+        "SELECT user_id,user_username,user_password FROM users WHERE user_username = :user_username  AND user_password = :user_password AND user_status ='active' ",
+        params! {
+            "user_username" => user_username,
+            "user_password" => _hashPassword
+        }
+    ){
+              Ok(user) => user,
+              Err(err) => return Err(format!("Failed to execute query: {}", err)),
+    };
+
+    // Check if the user exists
+    if let Some((user_id, user_username, user_password)) = user {
+      Ok(user_id.into())
+    } else {
+        Err("Invalid username or password".into())
+    }
+}
+
+#[command]
+async fn login_user_bk(user_username: String, user_password: String) -> Result<String,String> {
   // println!("User ID: {}", user_id);
     let pool = connect_to_mysql().await?;
     let mut conn = match pool.get_conn() {
@@ -275,6 +308,80 @@ async fn login_user(user_username: String, user_password: String) -> Result<Stri
     }
 }
 
+
+// -- ----------------------------
+// -- EndPoint for patient
+// -- ----------------------------
+#[command]
+async fn create_and_update_patient(
+  patient_title:String,
+  patient_fname:String,
+  patient_lname:String,
+  patient_tel:String,
+  patient_cid:String,
+  patient_addr:String,
+  user_id:u32,
+) -> Result<String, String> {
+
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+        Ok(conn) => conn,
+        Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+    };
+
+    let _patient = match conn.exec_drop(
+        "INSERT INTO patient (patient_title, patient_fname, patient_lname,patient_tel,patient_cid,patient_addr, patient_created, patient_updated,user_id)
+         VALUES (:patient_title, :patient_fname, :patient_lname, :patient_tel, :patient_cid, :patient_addr , NOW(), NOW(), :user_id)",
+        params! {
+            "patient_title" => patient_title,
+            "patient_fname" => patient_fname,
+            "patient_lname" => patient_lname,
+            "patient_tel" => patient_tel,
+            "patient_cid" => patient_cid,
+            "patient_addr" => patient_addr,
+            "user_id" => user_id
+        }
+    ){
+        Ok(_patient) => _patient,
+        Err(err) => return Err(format!("Failed to execute query: {}", err)),
+    };
+
+    // Retrieve the last inserted ID
+    let last_id = conn.last_insert_id();
+
+    let slip_patient_number = format!("{:05}", last_id);
+    let _slip_patient_number = "HN".to_owned()+&slip_patient_number;
+
+    let _patientUpdate = match  conn.exec_drop(
+        "UPDATE patient SET patient_hn = :patient_hn WHERE patient_id = :patient_id",
+          params! {
+              "patient_hn" => _slip_patient_number,
+              "patient_id" => last_id,
+          }
+      ){
+        Ok(_patientUpdate) => _patientUpdate,
+        Err(err) => return Err(format!("Failed to execute update query: {}", err)),
+    };
+
+
+    // let _phistory = match conn.exec_drop(
+    //   "INSERT INTO phistory (patient_hn,phistory_date, phistory_created, phistory_updated,user_id)
+    //     VALUES (:patient_hn ,  NOW() , NOW(), NOW(),:user_id)",
+    //   params! {
+    //       "patient_hn" => _slip_patient_number,
+    //       "user_id"=> user_id
+    //   }
+    // ){
+    //   Ok(_phistory) => _phistory,
+    //   Err(err) => return Err(format!("Failed to phistory execute insert query: {}", err)),
+    // };
+
+    println!("Last insert ID: {}", last_id);
+     // Return the ID of the inserted and updated item
+    Ok("ok".to_string())
+}
+
+
 fn main() {
   tauri::Builder::default()
     .invoke_handler(tauri::generate_handler![
@@ -282,7 +389,8 @@ fn main() {
       read_user_id,
       create_and_update_item,
       update_user_id,
-      login_user
+      login_user,
+      create_and_update_patient
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

@@ -32,6 +32,7 @@ CREATE TABLE `patient`  (
   `patient_addr` text CHARACTER SET utf8 COLLATE utf8_general_ci NULL COMMENT 'ที่อยู่',
   `patient_created` datetime NULL DEFAULT NULL COMMENT 'สร้าง',
   `patient_updated` datetime NULL DEFAULT NULL COMMENT 'อัพเดต',
+  `user_id` int(10) NULL DEFAULT NULL COMMENT 'ผู้บันทึก',
   PRIMARY KEY (`patient_id`) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 

@@ -77,8 +77,10 @@ export class LoginComponent implements OnInit {
         const password = this.formInitial.controls['password'].value;
 
         const result = await this._authService.loginUser(username,password);
-        if (result === 'success') {
-          sessionStorage.setItem('authToken', username);
+        console.log(result);
+        if (typeof result === 'number') {
+          let _userId = String(result);
+          sessionStorage.setItem('authToken', _userId);
           this._snackBar.open(`ยินดีต้อนรับเข้าสู่ระบบ`, '', {
             duration:1500,
             horizontalPosition: 'center',

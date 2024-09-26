@@ -16,6 +16,9 @@ import { Observable, map, startWith } from 'rxjs';
 import {MatTabsModule} from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
 import { MatRippleModule } from '@angular/material/core';
+import { AuthService } from '@core/services/auth.service';
+import { PatientServie } from '@core/services/patient.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 interface Employee {
   patient_id: number;
@@ -95,22 +98,6 @@ export class DashboardUserComponent implements OnInit{
   @Output() messageChange = new EventEmitter<string>();
 
 
-  departments = [
-    { id: 2, name: 'เจ้าหน้าที่ IPD' },
-    { id: 3, name: 'เจ้าหน้าที่ OPD' },
-    { id: 4, name: 'ศูนย์ OPD' },
-    { id: 5, name: 'ศูนย์ IPD' },
-  ];
-
-  options: any[] = [
-    {name: 'หน่วยงาน 1', id: 1},
-    {name: 'หน่วยงาน 2', id: 2},
-    {name: 'หน่วยงาน 3', id: 3},
-    {name: 'หน่วยงาน 4', id: 4},
-    {name: 'หน่วยงาน 5', id: 5}
-
-  ];
-
   ELEMENT_DATA = [
     {date: '20 กันยายน 2567'},
     {date: '10 เมษายน 2567'},
@@ -125,7 +112,7 @@ export class DashboardUserComponent implements OnInit{
     this.formGroupData.reset();
   }
 
-  accessibleId: string = "";
+  userId: any = "";
   formGroupData!: FormGroup;
 
   filteredOptions!: Observable<any[]>;
@@ -135,18 +122,13 @@ export class DashboardUserComponent implements OnInit{
   displayedColumns: string[] = ['date'];
   dataSource = this.ELEMENT_DATA;
 
-  constructor() {}
+  constructor(private _authService:AuthService,private  _patientServie: PatientServie,private _snackBar: MatSnackBar) {
 
-  ngOnInit(): void {
-    // this.accessibleId = '';
+  }
+
+  async ngOnInit() {
     // this.initForm();
-
-    this.filteredOptions = this.searchControl.valueChanges.pipe(
-      startWith(''),
-      map(value => this._filter(value))
-    );
-
-
+    this.userId = await this._authService.getUserId();
 
   }
 
@@ -155,8 +137,39 @@ export class DashboardUserComponent implements OnInit{
     if (this.formGroupData.valid) {
       // Handle form submission
       try {
-        const data: any = {};
-        data.name = this.formGroupData.value.patient_name;
+        console.log(this.formGroupData.value);
+        let patientTitle = this.formGroupData.value.patient_title;
+        let patientFname = this.formGroupData.value.patient_firstname;
+        let patientLname = this.formGroupData.value.patient_surname;
+        let patientTel = this.formGroupData.value.patient_tel;
+        let patientCid = this.formGroupData.value.patient_cid;
+        let patientAddr = this.formGroupData.value.patient_addr;
+        let _userId:number = parseInt(this.userId);
+
+          const result = await this._patientServie.createPatient(patientTitle,patientFname,patientLname,patientTel,patientCid,patientAddr,_userId);
+          console.log(result);
+            if(result === 'ok'){
+                this._snackBar.open(`บันทึกข้อมูลเรียบร้อย`, '', {
+                  duration:1500,
+                  horizontalPosition: 'center',
+                  verticalPosition: 'bottom',
+                  panelClass:['success-snackbar']
+                }).afterDismissed().subscribe(() => {
+                  // this.onMessageChange('close');
+                  this.initForm();
+                });
+              }else{
+                this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
+                  duration:3000,
+                  horizontalPosition: 'center',
+                  verticalPosition: 'bottom',
+                  panelClass:['error-snackbar']
+                }).afterDismissed().subscribe(() => {
+                  // this.onMessageChange('close');
+                  this.initForm();
+                });
+              }
+
       } catch (error: any) {
         // Handle error during form submission
         console.error(error);
@@ -174,26 +187,34 @@ export class DashboardUserComponent implements OnInit{
       patient_title: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
       patient_firstname: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
       patient_surname: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
-      patient_name: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
       patient_tel: new FormControl(this.formDataSignal()?.patient_tel,[]),
-      patient_depart: new FormControl(null,[Validators.required]),
       patient_cid: new FormControl(''),
       patient_addr: new FormControl(''),
-      patient_role_id: new FormControl(this.formDataSignal()?.patient_role_id,[Validators.required]),
-      patient_status: new FormControl(false,[Validators.required]),
-      patient_user: new FormControl('',[Validators.required]),
-      patient_pass: new FormControl('',[Validators.required]),
     });
+  }
+
+  updateForm(data:any) {
+    console.log(data);
+    // this.codeUser.set(data.user_code);
+    // this.formGroupData.patchValue({
+    //   user_title:data.user_title,
+    //   user_fname:data.user_fname,
+    //   user_lname:data.user_lname,
+    //   user_position:data.user_position,
+    //   user_username:data.user_username,
+    //   user_password:""
+    // });
+
+    // this.formGroupData.controls["user_password"].clearValidators();
+    // this.formGroupData.controls["user_password"].updateValueAndValidity();
+
   }
 
   onNoClick(): void {
 
   }
 
-  private _filter(value: string): any[] {
-    const filterValue = value.toLowerCase();
-    return this.options.filter(option => option.name.toLowerCase().includes(filterValue));
-  }
+
 
 
 
