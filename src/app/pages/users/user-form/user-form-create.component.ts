@@ -57,8 +57,8 @@ export class UserFormComponent implements OnInit{
 
     this.sideCreate.set(val)
   }
-  @Input() set userId(val:any){
 
+  @Input() set userId(val:any){
     console.log(val);
     this.idUser.set(val);
 

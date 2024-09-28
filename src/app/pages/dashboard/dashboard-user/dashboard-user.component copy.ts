@@ -57,8 +57,15 @@ interface Employee {
 export class DashboardUserComponent implements OnInit{
 
   sideCreate = signal(false);
-  _formId = signal('HN00000');
-  data:any;
+  _formId = signal(0);
+
+  formDataSignal:WritableSignal<Employee> = signal({
+    patient_id: 0,
+    patient_code: '',
+    patient_name: '',
+    patient_tel: '',
+    patient_role_id:''
+  })
 
 
   @Input() set sideopen(val:boolean){
@@ -70,12 +77,15 @@ export class DashboardUserComponent implements OnInit{
     console.log(val);
     this._formId.set(val);
 
-    if(this._formId() != 'HN00000'){
+    if(this._formId() != 0){
       console.log('is not 0');
-      // ฟอร์มแก้ไข
-      this.fetchData(val);
-    }
 
+      // ฟอร์มแก้ไข
+      // this.fetchData(val);
+
+    }
+    // ฟอร์มเพิ่ม
+    // this.fetchData(val);
     this.initForm();
   }
 
@@ -130,35 +140,9 @@ export class DashboardUserComponent implements OnInit{
         let patientCid = this.formGroupData.value.patient_cid;
         let patientAddr = this.formGroupData.value.patient_addr;
         let _userId:number = parseInt(this.userId);
-        let hn:string = this._formId();
-
-        if(hn != 'HN00000'){
-          const result = await this._patientServie.updatepatientByHn(patientTitle,patientFname,patientLname,patientTel,patientCid,patientAddr,_userId,hn);
-
-            if(result === 'ok'){
-              this._snackBar.open(`ปรับปรุงข้อมูลเรียบร้อย`, '', {
-                duration:1500,
-                horizontalPosition: 'center',
-                verticalPosition: 'bottom',
-                panelClass:['success-snackbar']
-              }).afterDismissed().subscribe(() => {
-                this.onMessageChange('close');
-              });
-              }else{
-                this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
-                  duration:3000,
-                  horizontalPosition: 'center',
-                  verticalPosition: 'bottom',
-                  panelClass:['error-snackbar']
-                }).afterDismissed().subscribe(() => {
-                  // this.onMessageChange('close');
-                  this.initForm();
-                });
-              }
-        }else{
 
           const result = await this._patientServie.createPatient(patientTitle,patientFname,patientLname,patientTel,patientCid,patientAddr,_userId);
-
+          console.log(result);
             if(result === 'ok'){
                 this._snackBar.open(`บันทึกข้อมูลเรียบร้อย`, '', {
                   duration:1500,
@@ -166,7 +150,7 @@ export class DashboardUserComponent implements OnInit{
                   verticalPosition: 'bottom',
                   panelClass:['success-snackbar']
                 }).afterDismissed().subscribe(() => {
-                  this.onMessageChange('close');
+                  // this.onMessageChange('close');
                   this.initForm();
                 });
               }else{
@@ -180,7 +164,6 @@ export class DashboardUserComponent implements OnInit{
                   this.initForm();
                 });
               }
-        }
 
       } catch (error: any) {
         // Handle error during form submission
@@ -192,53 +175,34 @@ export class DashboardUserComponent implements OnInit{
     }
   }
 
-
-
-
-  // ฟอร์มเพิ่ม
   initForm() {
+    console.log('Loadding ...',this.formDataSignal()?.patient_name)
+    // choice_depart choice_stamp
     this.formGroupData = new FormGroup({
-      patient_title: new FormControl('', [Validators.required]),
-      patient_firstname: new FormControl('', [Validators.required]),
-      patient_surname: new FormControl('', [Validators.required]),
-      patient_tel: new FormControl('',[]),
+      patient_title: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
+      patient_firstname: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
+      patient_surname: new FormControl(this.formDataSignal()?.patient_name, [Validators.required]),
+      patient_tel: new FormControl(this.formDataSignal()?.patient_tel,[]),
       patient_cid: new FormControl(''),
       patient_addr: new FormControl(''),
     });
   }
 
-  // ฟอร์มแก้ไข
   updateForm(data:any) {
     console.log(data);
     // this.codeUser.set(data.user_code);
-    this.formGroupData.patchValue({
-      patient_title:data.patient_title,
-      patient_firstname:data.patient_fname,
-      patient_surname:data.patient_lname,
-      patient_tel:data.patient_tel,
-      patient_cid:data.patient_cid,
-      patient_addr:data.patient_addr
-    });
+    // this.formGroupData.patchValue({
+    //   user_title:data.user_title,
+    //   user_fname:data.user_fname,
+    //   user_lname:data.user_lname,
+    //   user_position:data.user_position,
+    //   user_username:data.user_username,
+    //   user_password:""
+    // });
 
     // this.formGroupData.controls["user_password"].clearValidators();
     // this.formGroupData.controls["user_password"].updateValueAndValidity();
 
-  }
-
-  async fetchData(hn:string) {
-    console.log(hn);
-    try {
-      const result = await this._patientServie.readatientByHn(hn);
-      console.log(result);
-      this.data = result;
-      this.updateForm(result);
-      // return this.data;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    } finally {
-      console.log('Loading success....')
-    }
   }
 
   onNoClick(): void {

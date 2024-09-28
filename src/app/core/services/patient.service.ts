@@ -22,4 +22,40 @@ export class PatientServie {
       throw error;
     }
   }
+
+  async readPatients(){
+    try {
+      return await invoke('read_patients');
+    } catch (error) {
+      console.error("Error read users:", error);
+      throw error;
+    }
+  }
+
+  async readatientByHn(hn:string){
+    try {
+      return await invoke('read_patient_hn',{hn:hn});
+    } catch (error) {
+      console.error("Error read users:", error);
+      throw error;
+    }
+  }
+
+  async updatepatientByHn(
+    patientTitle:string,
+    patientFname:string,
+    patientLname:string,
+    patientTel:string,
+    patientCid:string,
+    patientAddr:string,
+    userId:number,
+    hn:string
+  ): Promise<any> {
+    try {
+      return await invoke('update_patient_hn',{patientTitle,patientFname,patientLname,patientTel,patientCid,patientAddr,userId,hn});
+    } catch (error) {
+      console.error("Error updating user:", error);
+      throw error;
+    }
+  }
 }

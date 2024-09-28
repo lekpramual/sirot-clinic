@@ -33,6 +33,25 @@ struct UserByID {
     user_username:String
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct Patient {
+    hn: String,
+    name: String,
+    tel: String,
+    last_date:String
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize, FromRow)]
+struct PatientById {
+    patient_hn: String,
+    patient_title: String,
+    patient_fname: String,
+    patient_lname: String,
+    patient_tel: String,
+    patient_cid:String,
+    patient_addr:String
+}
+
 
 // type user_code = String;
 
@@ -381,6 +400,119 @@ async fn create_and_update_patient(
     Ok("ok".to_string())
 }
 
+#[command]
+async fn read_patients() -> Result<Vec<Patient>, String> {
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+        Ok(conn) => conn,
+        Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+    };
+
+
+    // Perform a SELECT query.
+    let patients: Vec<Patient> = match conn.query_map(
+      "SELECT
+        p.patient_hn AS hn,
+        CONCAT( p.patient_title, p.patient_fname, ' ', p.patient_lname ) AS name,
+        p.patient_tel AS tel,
+        IFNULL(s.phistory_date,'-') AS last_date
+      FROM
+          patient AS p
+      LEFT JOIN phistory AS s
+      ON p.patient_hn = s.patient_hn
+      ORDER BY p.patient_hn DESC",
+      |(hn, name, tel, last_date)| Patient { hn, name, tel, last_date },
+    ) {
+        Ok(patients) => patients,
+        Err(err) => return Err(format!("Failed to execute query: {}", err)),
+    };
+
+    Ok(patients)
+}
+
+#[command]
+async fn read_patient_hn(hn: String) -> Result<Option<PatientById>,String> {
+  // println!("User ID: {}", user_id);
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+              Ok(conn) => conn,
+              Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+          };
+
+    let _patient: Option<PatientById> = match conn.exec_first(
+        "SELECT
+            patient_hn ,
+            patient_title,
+            patient_fname,
+            patient_lname,
+            patient_tel,
+            patient_cid,
+            patient_addr
+          FROM patient
+          WHERE patient_hn = :hn",
+          params! {
+              "hn" => hn,
+          }
+    ){
+              Ok(_patient) => _patient,
+              Err(err) => return Err(format!("Failed to execute query: {}", err)),
+          };
+
+    Ok(_patient)
+}
+
+#[command]
+async fn update_patient_hn(
+  patient_title:String,
+  patient_fname:String,
+  patient_lname:String,
+  patient_tel:String,
+  patient_cid:String,
+  patient_addr:String,
+  user_id:u32,
+  hn:String
+) -> Result<String, String> {
+
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+        Ok(conn) => conn,
+        Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+    };
+
+      let userUpdate = match  conn.exec_drop(
+        "UPDATE patient SET
+          patient_title = :patient_title,
+          patient_fname = :patient_fname,
+          patient_lname = :patient_lname,
+          patient_tel = :patient_tel,
+          patient_cid = :patient_cid,
+          patient_addr = :patient_addr,
+          patient_updated = NOW(),
+          user_id = :user_id
+          WHERE patient_hn = :hn",
+          params! {
+            "patient_title" => patient_title,
+            "patient_fname" => patient_fname,
+            "patient_lname" => patient_lname,
+            "patient_tel" => patient_tel,
+            "patient_cid" => patient_cid,
+            "patient_addr" => patient_addr,
+            "user_id" => user_id,
+            "hn" => hn
+          }
+      ){
+        Ok(userUpdate) => userUpdate,
+        Err(err) => return Err(format!("Failed to execute update query: {}", err)),
+      };
+
+
+
+
+    // println!("Last insert ID: {}", user_id);
+     // Return the ID of the inserted and updated item
+    Ok("ok".to_string())
+}
+
 
 fn main() {
   tauri::Builder::default()
@@ -390,7 +522,10 @@ fn main() {
       create_and_update_item,
       update_user_id,
       login_user,
-      create_and_update_patient
+      create_and_update_patient,
+      read_patients,
+      read_patient_hn,
+      update_patient_hn
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

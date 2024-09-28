@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { TPatient } from '@core/interfaces/patient.interfaces';
 import { Subject } from 'rxjs';
 
 
@@ -65,12 +66,18 @@ const users:UserList[] = [
 
 export default class DashboardListComponent{
 
+  _data: any;
   sideCreate = signal(false);
   searchValue = "";
   searchTerm = new Subject<string>();
 
   @Input() set sideopen(val:boolean){
     this.sideCreate.set(val)
+  }
+
+  @Input() set tbData(val:any){
+    // this._data = val;
+    this.dataSource.data = val;
   }
 
    // Output property to send data back to the parent
@@ -86,14 +93,18 @@ export default class DashboardListComponent{
     //  this.sideCreate.set(true)
    }
 
-  displayedColumns = ['emp_code','emp_name','emp_tel','emp_date','actions'];
+  displayedColumns = ['hn','name','tel','last_date','actions'];
 
   // dataSource = UserData;
-
-  dataSource!: MatTableDataSource<UserList>;
+  dataSource = new MatTableDataSource<TPatient>();
+  // dataSource!: MatTableDataSource<UserList>;
 
   constructor() {
-    this.dataSource = new MatTableDataSource(users);
+    // this.dataSource = new MatTableDataSource(users);
+  }
+
+  async fetchData() {
+    this.dataSource.data = this._data;
   }
 
   applyFilter(event: Event) {
@@ -103,9 +114,9 @@ export default class DashboardListComponent{
   }
 
   clickedJob(row:any){
-    console.log('Clicked Job', row);
+    console.log('Clicked Job', row.hn);
     this.onMessageChange();
-    this.formChange.emit(row);
+    this.formChange.emit(row.hn);
   }
 
   onButtonClick(row: any, event: Event) {

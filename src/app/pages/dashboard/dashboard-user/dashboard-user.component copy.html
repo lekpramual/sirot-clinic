@@ -1,0 +1,179 @@
+<!-- class="reh-form-sm" -->
+<mat-card >
+<mat-tab-group mat-stretch-tabs="false" mat-align-tabs="start">
+  <mat-tab >
+    <ng-template mat-tab-label >
+      <!-- <span class="mat-headline-5">ข้อมูลคนไข้</span> -->
+      <div class="row align-items-center px-2" >
+        <div class="col-12">
+          <span class="mat-headline-5 reh-txt-blue900">ข้อมูลคนไข้</span>
+        </div>
+      </div>
+    </ng-template>
+
+      <form [formGroup]="formGroupData"  (ngSubmit)="onSubmit()">
+        <div class="lj-container"  style="padding: 0px !important">
+
+          <div class="row" >
+            <div class="col-12" align="right" style="margin-top: 8px;">
+              <button mat-fab extended class="reh-btn-green">
+                <mat-icon fontSet="material-icons-outlined">save</mat-icon>
+                <span class="mat-subtitle-2">บันทึกข้อมูลคนไข้</span>
+              </button>
+            </div>
+          </div>
+            <section class="lj-viewer-wrapper p-4 m-2" tabindex="0">
+              <div class="row">
+                <div class="col-3">
+                  <mat-form-field class="reh-input-full-width">
+                    <mat-label>คำนำหน้า</mat-label>
+                    <input
+                      matInput
+                      name="patient_title"
+                      formControlName="patient_title"
+                      required
+                    />
+
+                    <mat-error
+                      *ngIf="
+                        formGroupData.get('patient_title')?.invalid ||
+                        formGroupData.get('patient_title')?.touched
+                      "
+                    >
+                      *โปรดระบุ คำนำหน้า</mat-error
+                    >
+                  </mat-form-field>
+                </div>
+                <div class="col-4">
+                  <mat-form-field class="reh-input-full-width">
+                    <mat-label>ชื่อ</mat-label>
+                    <input
+                      matInput
+                      name="patient_firstname"
+                      formControlName="patient_firstname"
+                      required
+                    />
+
+                    <mat-error
+                      *ngIf="
+                        formGroupData.get('patient_firstname')?.invalid ||
+                        formGroupData.get('patient_firstname')?.touched
+                      "
+                    >
+                      *โปรดระบุ ชื่อ</mat-error
+                    >
+                  </mat-form-field>
+                </div>
+                <div class="col-5">
+                  <mat-form-field class="reh-input-full-width">
+                    <mat-label>นามสกุล</mat-label>
+                    <input
+                      matInput
+                      name="patient_surname"
+                      formControlName="patient_surname"
+                      required
+                    />
+
+                    <mat-error
+                      *ngIf="
+                        formGroupData.get('patient_surname')?.invalid ||
+                        formGroupData.get('patient_surname')?.touched
+                      "
+                    >
+                      *โปรดระบุ นามสกุล</mat-error
+                    >
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <mat-form-field class="reh-input-full-width">
+                    <mat-label>เบอร์</mat-label>
+                    <input
+                      matInput
+                      name="patient_tel"
+                      placeholder="เบอร์"
+                      formControlName="patient_tel"
+                    />
+                  </mat-form-field>
+                </div>
+
+                <div class="col-6">
+                  <mat-form-field class="reh-input-full-width">
+                    <mat-label>รหัสบัตรประชาชน</mat-label>
+                    <input
+                      matInput
+                      name="patient_cid"
+                      placeholder="กรอก รหัสบัตรประชาชน"
+                      formControlName="patient_cid"
+                    />
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-12">
+                  <mat-form-field class="reh-input-full-width">
+                    <mat-label>ที่อยู่</mat-label>
+                    <textarea
+                      matInput
+                      id="patient_addr"
+                      formControlName="patient_addr"
+                      rows="2"
+                      cols="30"
+                      placeholder="ที่อยู่"
+                      >
+                    </textarea>
+                    <!-- <input
+                      matInput
+                      name="patient_addr"
+                      placeholder="ที่อยู่"
+                      formControlName="patient_addr"
+                    /> -->
+                  </mat-form-field>
+                </div>
+              </div>
+
+            </section>
+        </div>
+
+      </form>
+
+  </mat-tab>
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <!-- <span class="mat-headline-5">ข้อมูลคนไข้</span> -->
+      <div class="row align-items-center px-2" style="height: 58px">
+        <div class="col-12">
+          <span class="mat-headline-5 reh-txt-blue900">ประวัติการรักษา {{_formId()}}</span>
+        </div>
+
+      </div>
+    </ng-template>
+    <section class="lj-container px-0" tabindex="1">
+      <div class="row" >
+        <div class="col-12" align="right" style="margin-top: 8px;">
+          <button mat-fab extended class="reh-btn-blue">
+            <mat-icon fontSet="material-icons-outlined">post_add</mat-icon>
+            <span class="mat-subtitle-2">ส่งตรวจคนไข้</span>
+          </button>
+        </div>
+      </div>
+
+      <section class="lj-viewer-wrapper p-4 m-2" tabindex="0">
+      <mat-table [dataSource]="dataSource" >
+        <ng-container matColumnDef="date">
+          <mat-header-cell mat-header-cell *matHeaderCellDef> วันที่ </mat-header-cell>
+          <mat-cell mat-cell *matCellDef="let element"> {{element.date}} </mat-cell>
+        </ng-container>
+
+        <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+        <mat-row matRipple *matRowDef="let row; columns: displayedColumns;"></mat-row>
+      </mat-table>
+    </section>
+      </section>
+  </mat-tab>
+</mat-tab-group>
+</mat-card>
+
+

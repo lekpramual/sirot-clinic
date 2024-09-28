@@ -1,6 +1,8 @@
-import { Component, WritableSignal, signal } from '@angular/core';
+import { Component, OnInit, WritableSignal, signal } from '@angular/core';
 import DashboardListComponent from './dashboard-list/dashboard-list.component';
 import { DashboardUserComponent } from "./dashboard-user/dashboard-user.component";
+import { TPatient } from '@core/interfaces/patient.interfaces';
+import { PatientServie } from '@core/services/patient.service';
 
 
 interface Employee {
@@ -21,53 +23,53 @@ interface Employee {
     DashboardUserComponent
 ]
 })
-export default class DashboardComponent {
+export default class DashboardComponent  implements OnInit {
 
   // defualt false
-  isOpened = signal(true);
+  isOpened = signal(false);
+  formId = signal('HN00000');
 
-  formData:WritableSignal<Employee> = signal({
-    emp_id: 0,
-    emp_code: '',
-    emp_name: '',
-    emp_tel:'',
-    emp_role_id:''
-  })
+  data: TPatient[] = [];
+
+  constructor(private _patientServie: PatientServie) {}
+
+
+  ngOnInit(): void {
+    this.fetchData();
+  }
+
+  async fetchData() {
+    try {
+      const result:any = await this._patientServie.readPatients();
+      this.data = result;
+      // return this.data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      throw error;
+    } finally {
+      console.log('Loading success....')
+    }
+  }
 
   openSide(){
     this.isOpened.set(!this.isOpened)
   }
 
   onMessageChange($event:string){
-
     if($event === 'open'){
       this.isOpened.set(true);
-      this.resetEmployeeData();
+      this.formId.set('HN00000');
     }else if($event === 'close'){
       this.isOpened.set(false);
-      this.resetEmployeeData();
+      console.log('close...');
+      this.formId.set('HN00000');
+      this.fetchData();
     }
   }
 
   onFormData($event:any){
-    this.formData.update(emp => ({
-      ...emp,
-      emp_id: $event.emp_id,
-      emp_code: $event.emp_code,
-      emp_name:$event.emp_name,
-      emp_tel:$event.emp_tel,
-      emp_role_id:$event.emp_role_id,
-    }));
-  }
-
-  resetEmployeeData() {
-    this.formData.set({
-      emp_id: 0,
-      emp_code: '',
-      emp_name: '',
-      emp_tel:'',
-      emp_role_id:'',
-    });
+    console.log($event);
+    this.formId.set($event);
   }
 
 }
