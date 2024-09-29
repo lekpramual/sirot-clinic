@@ -52,6 +52,22 @@ struct PatientById {
     patient_addr:String
 }
 
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct PhistoryById {
+  phistory_date: String,
+  phistory_time: String,
+  phistory_name: String,
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct ReportByDate {
+  hn: String,
+  name: String,
+  tel: String,
+  date: String,
+  time: String
+}
+
 
 // type user_code = String;
 
@@ -407,20 +423,19 @@ async fn read_patients() -> Result<Vec<Patient>, String> {
         Ok(conn) => conn,
         Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
     };
-
-
     // Perform a SELECT query.
     let patients: Vec<Patient> = match conn.query_map(
       "SELECT
-        p.patient_hn AS hn,
-        CONCAT( p.patient_title, p.patient_fname, ' ', p.patient_lname ) AS name,
-        p.patient_tel AS tel,
-        IFNULL(s.phistory_date,'-') AS last_date
-      FROM
-          patient AS p
-      LEFT JOIN phistory AS s
-      ON p.patient_hn = s.patient_hn
-      ORDER BY p.patient_hn DESC",
+          p.patient_hn AS hn,
+          CONCAT( p.patient_title, p.patient_fname, ' ', p.patient_lname ) AS name,
+          p.patient_tel AS tel,
+          IFNULL(MAX(s.phistory_date),'-') AS last_date
+        FROM
+            patient AS p
+        LEFT JOIN  phistory AS s
+        ON p.patient_hn = s.patient_hn
+        GROUP BY  p.patient_hn
+        ORDER BY p.patient_hn DESC",
       |(hn, name, tel, last_date)| Patient { hn, name, tel, last_date },
     ) {
         Ok(patients) => patients,
@@ -429,6 +444,7 @@ async fn read_patients() -> Result<Vec<Patient>, String> {
 
     Ok(patients)
 }
+
 
 #[command]
 async fn read_patient_hn(hn: String) -> Result<Option<PatientById>,String> {
@@ -513,6 +529,101 @@ async fn update_patient_hn(
     Ok("ok".to_string())
 }
 
+#[command]
+async fn read_phistory_hn(hn: String) -> Result<Vec<PhistoryById>,String> {
+  // println!("User ID: {}", user_id);
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+              Ok(conn) => conn,
+              Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+          };
+
+    let _phistory: Vec<PhistoryById> = match conn.exec_map(
+        "SELECT DATE_FORMAT(phistory_date, '%Y-%m-%d') AS phistory_date,TIME_FORMAT(p.phistory_time, '%H:%i:%s') AS phistory_time, CONCAT( s.user_title, s.user_fname, ' ', s.user_lname ) AS phistory_name
+            FROM phistory AS p
+            INNER JOIN users AS s
+            ON s.user_id = p.user_id
+            WHERE p.patient_hn = :hn
+          ORDER BY p.phistory_date DESC",
+          params! {
+              "hn" => hn,
+          },
+          |(phistory_date,phistory_time,phistory_name)| PhistoryById { phistory_date,phistory_time,phistory_name },
+          ){
+                    Ok(_phistory) => _phistory,
+                    Err(err) => return Err(format!("Failed to execute query: {}", err)),
+                };
+
+    Ok(_phistory)
+}
+
+
+#[command]
+async fn create_phistory(
+  phistory_hn:String,
+  user_id:u32,
+) -> Result<String, String> {
+
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+        Ok(conn) => conn,
+        Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+    };
+
+
+    let _phistory = match conn.exec_drop(
+        "INSERT INTO phistory (patient_hn, phistory_date, phistory_time,phistory_created, phistory_updated,user_id)
+         VALUES (:patient_hn, NOW(), NOW(), NOW(), NOW(), :user_id)",
+        params! {
+            "patient_hn" => phistory_hn,
+            "user_id" => user_id
+        }
+    ){
+        Ok(_phistory) => _phistory,
+        Err(err) => return Err(format!("Failed to execute query: {}", err)),
+    };
+
+     // Return the ID of the inserted and updated item
+    Ok("ok".to_string())
+}
+
+#[command]
+async fn read_report_date(begin: String,end:String) -> Result<Vec<ReportByDate>,String> {
+  // println!("User ID: {}", user_id);
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+              Ok(conn) => conn,
+              Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+          };
+
+    let _reports: Vec<ReportByDate> = match conn.exec_map(
+        "SELECT
+          p.patient_hn AS hn,
+          CONCAT( p.patient_title, p.patient_fname, ' ', p.patient_lname ) AS name,
+          p.patient_tel AS tel,
+          DATE_FORMAT(s.phistory_date, '%Y-%m-%d') AS date,
+          DATE_FORMAT(s.phistory_time, '%H:%i:%s') AS time
+        FROM
+            patient AS p
+        INNER JOIN  phistory AS s
+        ON p.patient_hn = s.patient_hn
+        WHERE DATE_FORMAT(phistory_date, '%Y-%m-%d') BETWEEN :begin AND :end
+        ORDER BY s.phistory_date,s.phistory_time DESC
+        ",
+          params! {
+              "begin" => begin,
+              "end" => end
+          },
+          |(hn,name,tel,date,time)| ReportByDate { hn,name,tel,date,time },
+          ){
+                    Ok(_reports) => _reports,
+                    Err(err) => return Err(format!("Failed to execute query: {}", err)),
+                };
+
+    Ok(_reports)
+}
+
+
 
 fn main() {
   tauri::Builder::default()
@@ -525,7 +636,10 @@ fn main() {
       create_and_update_patient,
       read_patients,
       read_patient_hn,
-      update_patient_hn
+      update_patient_hn,
+      read_phistory_hn,
+      create_phistory,
+      read_report_date
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

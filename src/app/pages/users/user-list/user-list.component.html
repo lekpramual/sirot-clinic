@@ -40,24 +40,29 @@
           <table mat-table class="accept" [dataSource]="dataSource">
             <ng-container matColumnDef="user_code">
               <th mat-header-cell *matHeaderCellDef>
-                <strong>รหัส จนท</strong>
+
+                <span class="mat-subtitle-2">รหัส จนท</span>
               </th>
               <td mat-cell *matCellDef="let element">
-                {{ element.user_code }}
+
+                <span class="mat-subtitle-1">{{ element.user_code }}</span>
               </td>
             </ng-container>
             <ng-container matColumnDef="user_fullname">
               <th mat-header-cell *matHeaderCellDef>
-                <strong>ชื่อ-สุกล</strong>
+
+                <span class="mat-subtitle-2">ชื่อ-สุกล</span>
               </th>
               <td mat-cell *matCellDef="let element">
-                {{ element.user_fullname }}
+
+                <span class="mat-subtitle-1">{{ element.user_fullname }}</span>
               </td>
             </ng-container>
 
             <ng-container matColumnDef="user_position">
               <th mat-header-cell *matHeaderCellDef style="text-align: center">
-                <strong>ประเภท</strong>
+
+                <span class="mat-subtitle-2">ประเภท</span>
               </th>
               <td mat-cell *matCellDef="let element">
                 <div class="row justify-content-center">
@@ -65,14 +70,16 @@
                     style="width: 96px"
                     class="reh-chip-blue"
                   >
-                    <span class="label">{{ element.user_position }}</span>
+
+                    <span class="mat-subtitle-1 label">{{ element.user_position }}</span>
                   </mat-chip>
                 </div>
               </td>
             </ng-container>
             <ng-container matColumnDef="user_status">
               <th mat-header-cell *matHeaderCellDef style="text-align: center">
-                <strong>สถานะ</strong>
+
+                <span class="mat-subtitle-2">สถานะ</span>
               </th>
               <td mat-cell *matCellDef="let element">
                 <div class="row justify-content-center">
@@ -83,7 +90,7 @@
                     'reh-chip-red' : element.emp_status_id == 'inactive',
                   }"
                   >
-                    <span class="label">{{ element.user_status }}</span>
+                    <span class="mat-subtitle-1 label">{{ element.user_status }}</span>
                   </mat-chip>
                 </div>
               </td>

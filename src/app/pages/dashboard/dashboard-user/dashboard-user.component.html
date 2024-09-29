@@ -107,6 +107,8 @@
                   name="patient_tel"
                   placeholder="เบอร์"
                   formControlName="patient_tel"
+                  mask="000-0000000"
+
                 />
               </mat-form-field>
             </div>
@@ -119,6 +121,7 @@
                   name="patient_cid"
                   placeholder="กรอก รหัสบัตรประชาชน"
                   formControlName="patient_cid"
+                  mask="0-0000-00000-00-0"
                 />
               </mat-form-field>
             </div>
@@ -148,6 +151,67 @@
           </div>
 
         </section>
+
+        @if(_formId() != 'HN00000'){
+
+          <div class="lj-viewer-wrapper p-4 m-2">
+            <div class="row align-items-center g-3">
+              <div class="col-6">
+                <span class="mat-headline-6 reh-txt-blue900"
+                  >ประวัติการรักษา</span
+                >
+              </div>
+              <div class="col-6" align="end">
+                <button mat-fab extended class="reh-btn-green" style="margin-top: -20px;" type="button" (click)="btnPhistory()">
+                    <mat-icon fontSet="material-icons-outlined">add</mat-icon>
+                    <span class="mat-subtitle-2">ส่งตรวจคนไข้</span>
+                </button>
+              </div>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="row" style="margin-top:8px !important">
+              <table mat-table [dataSource]="dataSource" >
+                <ng-container matColumnDef="phistory_date">
+                  <th mat-header-cell mat-header-cell *matHeaderCellDef>
+
+                    <span class="mat-subtitle-2">วันที่</span>
+                  </th>
+                  <td mat-cell mat-cell *matCellDef="let element">
+                    <span class="mat-subtitle-1">{{ formatDateThai(element.phistory_date) }}</span>
+                     </td>
+                </ng-container>
+                <ng-container matColumnDef="phistory_time">
+                  <th mat-header-cell mat-header-cell *matHeaderCellDef>
+
+                    <span class="mat-subtitle-2">เวลา</span>
+                  </th>
+                  <td mat-cell mat-cell *matCellDef="let element">
+                    <span class="mat-subtitle-1">{{ element.phistory_time }} น.</span>
+                     </td>
+                </ng-container>
+                <ng-container matColumnDef="phistory_name">
+                  <th mat-header-cell mat-header-cell *matHeaderCellDef>
+
+                    <span class="mat-subtitle-2">ผู้บันทึก</span>
+                  </th>
+                  <td mat-cell mat-cell *matCellDef="let element">
+                    <span class="mat-subtitle-1">{{ element.phistory_name }}</span>
+                     </td>
+                </ng-container>
+
+                <tr
+                  mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr
+                mat-row matRipple *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <tr class="mat-row" *matNoDataRow style="text-align: center;height: 64px;">
+                  <td class="mat-cell"  *ngIf="dataSource.length === 0">---ไม่พบข้อมูลส่งตรวจ---</td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        }
+
       </section>
     </section>
   </div>

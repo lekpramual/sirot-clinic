@@ -40,39 +40,57 @@
             <table mat-table  [dataSource]="dataSource">
               <ng-container matColumnDef="hn">
                 <th mat-header-cell *matHeaderCellDef>
-                  <strong>HN</strong>
+
+                  <span class="mat-subtitle-2">HN</span>
                 </th>
                 <td mat-cell *matCellDef="let element">
-                  {{ element.hn }}
+                  <span class="mat-subtitle-1">{{ element.hn }}</span>
                 </td>
               </ng-container>
               <ng-container matColumnDef="name">
                 <th mat-header-cell *matHeaderCellDef>
-                  <strong>ชื่อ-สุกล</strong>
+
+                  <span class="mat-subtitle-2">ชื่อ-สุกล</span>
                 </th>
                 <td mat-cell *matCellDef="let element">
-                  {{ element.name }}
+
+                  <span class="mat-subtitle-1"> {{ element.name }}</span>
                 </td>
               </ng-container>
 
               <ng-container matColumnDef="tel">
                 <th mat-header-cell *matHeaderCellDef>
-                  <strong>เบอร์</strong>
+
+                  <span class="mat-subtitle-2">เบอร์</span>
                 </th>
                 <td mat-cell *matCellDef="let element">
-                  {{ element.tel }}
+
+                  @if(element.tel != ''){
+
+                    <span class="mat-subtitle-1"> {{ element.tel }}</span>
+                  }@else {
+                    <span class="mat-subtitle-1"> - </span>
+                  }
                 </td>
               </ng-container>
 
 
               <ng-container matColumnDef="last_date">
-                <th mat-header-cell *matHeaderCellDef><strong>วันที่มาล่าสุด</strong></th>
+                <th mat-header-cell *matHeaderCellDef>
+                  <span class="mat-subtitle-2">ส่งตรวจล่าสุด</span>
+                </th>
                 <td mat-cell *matCellDef="let element">
-                  {{ element.last_date }}
+                  @if(element.last_date != '-'){
+
+                    <span class="mat-subtitle-1"> {{ formatDateThai(element.last_date) }}</span>
+                  }@else {
+                    <span class="mat-subtitle-1"> {{ element.last_date }}</span>
+                  }
+
                 </td>
               </ng-container>
               <ng-container matColumnDef="actions" stickyEnd>
-                <th mat-header-cell *matHeaderCellDef aria-label="row actions" style="text-align: center;">คำสั่ง</th>
+                <th mat-header-cell *matHeaderCellDef aria-label="row actions" style="text-align: center;"><span class="mat-subtitle-2">คำสั่ง</span></th>
                 <td mat-cell *matCellDef="let element">
                   <div class="row">
                     <div class="col-6">
@@ -81,8 +99,8 @@
                       </button>
                     </div>
                     <div class="col-6">
-                      <button  mat-mini-fab matTooltip="ประวัติการรักษา" class="reh-btn-blue">
-                        <mat-icon>list</mat-icon>
+                      <button  mat-mini-fab matTooltip="ส่งตรวจคนไข้" class="reh-btn-blue" (click)="btnPhistory(element.hn)">
+                        <mat-icon>medical_information</mat-icon>
                       </button>
                     </div>
                   </div>
@@ -104,9 +122,14 @@
               <tr class="mat-row" *matNoDataRow style="text-align: center;height: 64px;">
                 <td class="mat-cell" colspan="6">ไม่พบข้อมูลที่คุณ ค้นหา "{{input.value}}"</td>
               </tr>
+
+
             </table>
 
-            {{_data | json}}
+            <mat-paginator [pageSize]="10" [pageSizeOptions]="[5, 10, 15]">
+            </mat-paginator>
+
+
           </section>
         </div>
       </div>

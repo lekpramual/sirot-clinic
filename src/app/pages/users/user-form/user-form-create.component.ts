@@ -59,11 +59,10 @@ export class UserFormComponent implements OnInit{
   }
 
   @Input() set userId(val:any){
-    console.log(val);
+
     this.idUser.set(val);
 
     if(this.idUser() != 0){
-      console.log('is not 0');
       this.fetchData(val);
       // this.updateForm(result);
     }
@@ -93,11 +92,9 @@ export class UserFormComponent implements OnInit{
   }
 
   async onSubmit() {
-    console.log(this.formGroupData.valid);
     if (this.formGroupData.valid) {
       // Handle form submission
       try {
-        console.log(this.formGroupData.value);
         let userId = this.idUser();
         let userTitle = this.formGroupData.value.user_title;
         let userFname = this.formGroupData.value.user_fname;
@@ -167,7 +164,6 @@ export class UserFormComponent implements OnInit{
   }
 
   updateForm(data:any) {
-    console.log(data);
     this.codeUser.set(data.user_code);
     this.formGroupData.patchValue({
       user_title:data.user_title,

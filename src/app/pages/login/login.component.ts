@@ -77,7 +77,7 @@ export class LoginComponent implements OnInit {
         const password = this.formInitial.controls['password'].value;
 
         const result = await this._authService.loginUser(username,password);
-        console.log(result);
+
         if (typeof result === 'number') {
           let _userId = String(result);
           sessionStorage.setItem('authToken', _userId);
@@ -97,7 +97,6 @@ export class LoginComponent implements OnInit {
             panelClass:['error-snackbar']
           }).onAction().subscribe(() => {
             // Handle the action button click here
-            console.log('Snackbar action button clicked!');
             this.initForm();
           });
         }
@@ -110,7 +109,6 @@ export class LoginComponent implements OnInit {
           panelClass:['error-snackbar']
         }).onAction().subscribe(() => {
           // Handle the action button click here
-          console.log('Snackbar action button clicked!');
           this.initForm();
         });
       }

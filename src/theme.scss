@@ -67,8 +67,8 @@ $reh-typography-config: mat.define-typography-config(
   $headline-4: mat.define-typography-level(34px, 40px, 400,$heading-font-family),
   $headline-5: mat.define-typography-level(24px, 32px, 400,$heading-font-family),
   $headline-6: mat.define-typography-level(20px, 32px, 400,$heading-font-family),
-  $subtitle-1: mat.define-typography-level(16px, 28px, 400),
-  $subtitle-2: mat.define-typography-level(16px, 28px, 400,$heading-font-family),
+  $subtitle-1: mat.define-typography-level(20px, 28px, 400),
+  $subtitle-2: mat.define-typography-level(20px, 28px, 400,$heading-font-family),
   $body-1: mat.define-typography-level(20px, 20px, 400),
   $body-2: mat.define-typography-level(20px, 20px, 400),
 
@@ -103,13 +103,13 @@ $button-typography: mat.define-typography-config(
 
 $button-typography-sarabun: mat.define-typography-config(
   $font-family: "THSarabunNew",
-  $button: mat.define-typography-level(14px, 20px, 700),
+  $button: mat.define-typography-level(20px, 20px, 700),
 );
 
 // กำหนดค่า form input.
 $input-typography-sarabun: mat.define-typography-config(
   $font-family: "THSarabunNew",
-  $button: mat.define-typography-level(14px, 20px, 400),
+  $button: mat.define-typography-level(20px, 20px, 400),
 );
 
 

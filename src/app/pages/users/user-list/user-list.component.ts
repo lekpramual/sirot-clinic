@@ -65,7 +65,6 @@ export default class UserListComponent{
 
    // Method to handle changes and emit the new value
    onMessageChange() {
-    // console.log(newMessage)
      this.messageChange.emit('open');
     //  this.sideCreate.set(true)
    }
@@ -89,11 +88,7 @@ export default class UserListComponent{
 
 
 
-  // async getApi(){
-  //   invoke('greet', { name: 'World' })
-  //   // `invoke` returns a Promise
-  //   .then((response) => console.log(response))
-  // }
+
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
@@ -102,14 +97,12 @@ export default class UserListComponent{
   }
 
   clickedJob(row:any){
-    console.log('Clicked Job', row.user_id);
     this.onMessageChange();
     this.formChange.emit(row.user_id);
   }
 
   onButtonClick(row: any, event: Event) {
     event.stopPropagation();
-    // console.log('Button clicked: ', row);
   }
 
   openSide(){

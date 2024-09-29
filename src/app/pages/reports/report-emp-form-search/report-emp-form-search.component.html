@@ -1,0 +1,147 @@
+<form
+  [formGroup]="formGroupData"
+  (ngSubmit)="onSubmit()"
+>
+  <mat-card>
+      <!-- <mat-divider /> -->
+      <section class="pt-2" tabindex="0" >
+        <div class="row mt-3 mx-0 justify-content-center">
+          <div class="col-6">
+            <mat-form-field class="reh-input-full-width">
+              <mat-label>วันที่เริ่ม</mat-label>
+              <!-- datePickerFormat="YYYY/MM/DD" -->
+              <input
+                matInput
+                name="emp_start"
+                formControlName="emp_start"
+                placeholder="วันที่เริ่ม"
+                [max]="maxDate"
+                [min]="minDate"
+                [matDatepicker]="picker_start"
+                datePickerFormat = "YYYY/MM/DD"
+
+              />
+
+              <mat-datepicker-toggle matIconSuffix [for]="picker_start"></mat-datepicker-toggle>
+              <mat-datepicker #picker_start></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </div>
+
+          <div class="row mx-0  justify-content-center" >
+            <div class="col-6">
+              <mat-form-field class="reh-input-full-width">
+                <mat-label>วันที่สิ้นสุด</mat-label>
+                <input
+                  matInput
+                  name="emp_end"
+                  formControlName="emp_end"
+                  placeholder="วันที่สิ้นสุด"
+                  [max]="maxDate"
+                  [min]="minDate"
+                  [matDatepicker]="picker_end"
+                  datePickerFormat="DD MMM YYYY"
+
+                />
+
+                <mat-datepicker-toggle matIconSuffix [for]="picker_end"></mat-datepicker-toggle>
+                <mat-datepicker #picker_end></mat-datepicker>
+
+
+                <mat-error
+                  *ngIf="
+                    formGroupData.get('emp_end')?.invalid ||
+                    formGroupData.get('emp_end')?.touched
+                  "
+                >
+                  *โปรดระบุ วันที่สิ้นสุด</mat-error>
+              </mat-form-field>
+            </div>
+          </div>
+
+          <mat-divider></mat-divider>
+          <div class="row mx-0 mb-2  justify-content-center">
+          <div class="col-6" align="center">
+            <button mat-fab extended class="reh-btn-blue">
+              <mat-icon fontSet="material-icons-outlined">print</mat-icon>
+              <span class="mat-subtitle-2">แสดงรายงาน</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      @if(this.formGroupData.valid){
+
+        <div class="row lj-viewer-wrapper p-4 m-2" style="margin-top:8px !important" >
+          <div class="row">
+            <div class="col-12">
+              <span class="mat-subtitle-2">รายงานยอดรับบริการ ประจำวันที่ {{formatDate(this.formGroupData.get('emp_start')?.value)}} - {{formatDate(this.formGroupData.get('emp_end')?.value)}}</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12">
+              <span class="mat-subtitle-2">จำนวนทั้งหมด : {{dataSource.length}}  รายการ</span>
+            </div>
+          </div>
+          <table mat-table [dataSource]="dataSource" >
+            <ng-container matColumnDef="hn">
+              <th mat-header-cell mat-header-cell *matHeaderCellDef>
+
+                <span class="mat-subtitle-2">HN</span>
+              </th>
+              <td mat-cell mat-cell *matCellDef="let element">
+                <span class="mat-subtitle-1">{{ element.hn }}</span>
+                 </td>
+            </ng-container>
+            <ng-container matColumnDef="tel">
+              <th mat-header-cell mat-header-cell *matHeaderCellDef>
+
+                <span class="mat-subtitle-2">เบอร์</span>
+              </th>
+              <td mat-cell mat-cell *matCellDef="let element">
+                <span class="mat-subtitle-1">{{ element.tel }}</span>
+                 </td>
+            </ng-container>
+            <ng-container matColumnDef="date">
+              <th mat-header-cell mat-header-cell *matHeaderCellDef>
+
+                <span class="mat-subtitle-2">วันที่</span>
+              </th>
+              <td mat-cell mat-cell *matCellDef="let element">
+                <span class="mat-subtitle-1">{{ formatDate(element.date) }}</span>
+                 </td>
+            </ng-container>
+            <ng-container matColumnDef="time">
+              <th mat-header-cell mat-header-cell *matHeaderCellDef>
+
+                <span class="mat-subtitle-2">เวลา</span>
+              </th>
+              <td mat-cell mat-cell *matCellDef="let element">
+                <span class="mat-subtitle-1">{{ element.time }} น.</span>
+                 </td>
+            </ng-container>
+            <ng-container matColumnDef="name">
+              <th mat-header-cell mat-header-cell *matHeaderCellDef>
+
+                <span class="mat-subtitle-2">ชื่อ-สกุล</span>
+              </th>
+              <td mat-cell mat-cell *matCellDef="let element">
+                <span class="mat-subtitle-1">{{ element.name }}</span>
+                 </td>
+            </ng-container>
+
+            <tr
+              mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr
+            mat-row matRipple *matRowDef="let row; columns: displayedColumns;"></tr>
+
+            <tr class="mat-row" *matNoDataRow style="text-align: center;height: 64px;">
+              <td class="mat-cell" colspan="5"  *ngIf="dataSource.length === 0">---ไม่พบข้อมูลส่งตรวจ---</td>
+            </tr>
+          </table>
+        </div>
+      }
+
+
+  </mat-card>
+</form>

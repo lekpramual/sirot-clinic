@@ -26,6 +26,9 @@ export const routes: Routes = [
       {
         path: 'users',
         loadComponent : (() => import("../app/pages/users/users.component")),
+      },{
+        path: 'reports',
+        loadComponent : (() => import("../app/pages/reports/reports.component")),
       }
     ],
   },

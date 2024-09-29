@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output, signal, ViewChild } from '@angular/core';
 import { FormGroup, FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -14,7 +14,13 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TPatient } from '@core/interfaces/patient.interfaces';
 import { Subject } from 'rxjs';
-
+import { MatPaginator, MatPaginatorModule,MatPaginatorIntl } from "@angular/material/paginator";
+import { getThaiPaginatorIntl } from '@core/components/thai-paginator-intl';
+import { PhistoryServie } from '@core/services/phistory.service';
+import { AuthService } from '@core/services/auth.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import moment from 'moment';
+import 'moment/locale/th';
 
 export interface PeriodicElement {
   name: string;
@@ -59,16 +65,23 @@ const users:UserList[] = [
     MatDividerModule,
     MatChipsModule,
     MatTooltipModule,
+    MatPaginatorModule,
     CommonModule
   ],
+  providers:[
+    { provide: MatPaginatorIntl, useValue: getThaiPaginatorIntl() },
+  ]
 
 })
 
 export default class DashboardListComponent{
 
+  @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
+
   _data: any;
   sideCreate = signal(false);
   searchValue = "";
+  userId: any = "";
   searchTerm = new Subject<string>();
 
   @Input() set sideopen(val:boolean){
@@ -88,7 +101,7 @@ export default class DashboardListComponent{
 
    // Method to handle changes and emit the new value
    onMessageChange() {
-    // console.log(newMessage)
+
      this.messageChange.emit('open');
     //  this.sideCreate.set(true)
    }
@@ -99,8 +112,34 @@ export default class DashboardListComponent{
   dataSource = new MatTableDataSource<TPatient>();
   // dataSource!: MatTableDataSource<UserList>;
 
-  constructor() {
+  constructor(private _authService:AuthService,private _phistoryServie: PhistoryServie,private _snackBar: MatSnackBar) {
     // this.dataSource = new MatTableDataSource(users);
+
+    moment.updateLocale('th', {
+      longDateFormat: {
+        LT: 'HH:mm',
+        LTS: 'HH:mm:ss',
+        L: 'DD/MM/YYYY',
+        LL: 'D MMMM YYYY',
+        LLL: 'D MMMM YYYY เวลา HH:mm',
+        LLLL: 'วันddddที่ D MMMM YYYY เวลา HH:mm',
+      },
+      // Function to add 543 years to the Gregorian year
+      postformat: (str: any) =>
+        str.replace(/(\d{4})/g, (year: any) =>
+          (parseInt(year, 10) + 543).toString()
+        ),
+    });
+  }
+
+  async ngOnInit() {
+    // this.initForm();
+    this.userId = await this._authService.getUserId();
+
+  }
+
+  ngAfterViewInit() {
+    this.dataSource.paginator = this.paginator;
   }
 
   async fetchData() {
@@ -114,14 +153,57 @@ export default class DashboardListComponent{
   }
 
   clickedJob(row:any){
-    console.log('Clicked Job', row.hn);
     this.onMessageChange();
     this.formChange.emit(row.hn);
   }
 
+  async btnPhistory(hn:string) {
+    try {
+
+      let _userId:number = parseInt(this.userId);
+
+
+      if(_userId > 0){
+        const result = await this._phistoryServie.createPhistory(hn,_userId);
+          if(result === 'ok'){
+            this._snackBar.open(`ส่งตรวจข้อมูลเรียบร้อย`, '', {
+              duration:1500,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+              panelClass:['success-snackbar']
+            }).afterDismissed().subscribe(() => {
+              this.messageChange.emit('reset');
+            });
+            }else{
+              this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
+                duration:3000,
+                horizontalPosition: 'center',
+                verticalPosition: 'bottom',
+                panelClass:['error-snackbar']
+              }).afterDismissed().subscribe(() => {
+                // this.onMessageChange('close');
+                // this.initForm();
+              });
+            }
+      }
+
+    } catch (error: any) {
+      // Handle error during form submission
+      console.error(error);
+      this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
+        duration:3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass:['error-snackbar']
+      }).afterDismissed().subscribe(() => {
+        // this.onMessageChange('close');
+        // this.initForm();
+      });
+    }
+  }
+
   onButtonClick(row: any, event: Event) {
     event.stopPropagation();
-    // console.log('Button clicked: ', row);
   }
 
   openSide(){
@@ -135,6 +217,11 @@ export default class DashboardListComponent{
 
     this.dataSource.filter = '';
 
+  }
+  //ฟังก์ชั่น: ปีภาษาไทย
+  formatDateThai(date: Date): string {
+    // return moment(date).format("LL"); // Customize the format as needed
+    return moment(date).format("ll"); // Customize the format as needed
   }
 
 

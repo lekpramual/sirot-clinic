@@ -20,6 +20,13 @@ import { AuthService } from '@core/services/auth.service';
 import { PatientServie } from '@core/services/patient.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
+
+import { PhoneMaskDirective } from '@core/directives/phone-mask.directive';
+import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
+import { PhistoryServie } from '@core/services/phistory.service';
+import moment from 'moment';
+import 'moment/locale/th';
+
 interface Employee {
   patient_id: number;
   patient_code: string;
@@ -51,7 +58,11 @@ interface Employee {
     MatCardModule,
     MatTabsModule,
     MatTableModule,
-    MatRippleModule
+    MatRippleModule,
+    NgxMaskDirective
+  ],
+  providers:[
+    provideNgxMask()
   ]
 })
 export class DashboardUserComponent implements OnInit{
@@ -59,6 +70,7 @@ export class DashboardUserComponent implements OnInit{
   sideCreate = signal(false);
   _formId = signal('HN00000');
   data:any;
+  _data:any;
 
 
   @Input() set sideopen(val:boolean){
@@ -67,13 +79,13 @@ export class DashboardUserComponent implements OnInit{
   }
 
   @Input() set formId(val:any){
-    console.log(val);
+
     this._formId.set(val);
 
     if(this._formId() != 'HN00000'){
-      console.log('is not 0');
       // ฟอร์มแก้ไข
       this.fetchData(val);
+      this.fetchPhistoryData(val);
     }
 
     this.initForm();
@@ -82,14 +94,6 @@ export class DashboardUserComponent implements OnInit{
   // Output property to send data back to the parent
   @Output() messageChange = new EventEmitter<string>();
 
-
-  ELEMENT_DATA = [
-    {date: '20 กันยายน 2567'},
-    {date: '10 เมษายน 2567'},
-    {date: '2 มีนาคม 2567'},
-    {date: '1 กุมภาพันธ์ 2567'},
-    {date: '1 มกราคม 2567'}
-  ];
 
   // Method to handle changes and emit the new value
   onMessageChange(newMessage: string) {
@@ -104,11 +108,26 @@ export class DashboardUserComponent implements OnInit{
   searchControl: FormControl = new FormControl();
 
 
-  displayedColumns: string[] = ['date'];
-  dataSource = this.ELEMENT_DATA;
+  displayedColumns: string[] = ['phistory_date','phistory_time','phistory_name'];
+  dataSource:any = [];
 
-  constructor(private _authService:AuthService,private  _patientServie: PatientServie,private _snackBar: MatSnackBar) {
+  constructor(private _authService:AuthService,private  _patientServie: PatientServie,private _phistoryServie: PhistoryServie,private _snackBar: MatSnackBar) {
 
+    moment.updateLocale('th', {
+      longDateFormat: {
+        LT: 'HH:mm',
+        LTS: 'HH:mm:ss',
+        L: 'DD/MM/YYYY',
+        LL: 'D MMMM YYYY',
+        LLL: 'D MMMM YYYY เวลา HH:mm',
+        LLLL: 'วันddddที่ D MMMM YYYY เวลา HH:mm',
+      },
+      // Function to add 543 years to the Gregorian year
+      postformat: (str: any) =>
+        str.replace(/(\d{4})/g, (year: any) =>
+          (parseInt(year, 10) + 543).toString()
+        ),
+    });
   }
 
   async ngOnInit() {
@@ -118,11 +137,9 @@ export class DashboardUserComponent implements OnInit{
   }
 
   async onSubmit() {
-    console.log(this.formGroupData.valid);
     if (this.formGroupData.valid) {
       // Handle form submission
       try {
-        console.log(this.formGroupData.value);
         let patientTitle = this.formGroupData.value.patient_title;
         let patientFname = this.formGroupData.value.patient_firstname;
         let patientLname = this.formGroupData.value.patient_surname;
@@ -188,12 +205,55 @@ export class DashboardUserComponent implements OnInit{
       }
     } else {
       // Handle form validation errors
-      console.log("form validation error..");
     }
   }
 
+  async btnPhistory() {
+    try {
 
+      let _userId:number = parseInt(this.userId);
+      let hn:string = this._formId();
 
+      if(hn != 'HN00000'){
+        const result = await this._phistoryServie.createPhistory(hn,_userId);
+          if(result === 'ok'){
+            this._snackBar.open(`ส่งตรวจข้อมูลเรียบร้อย`, '', {
+              duration:1500,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+              panelClass:['success-snackbar']
+            }).afterDismissed().subscribe(() => {
+              // this.onMessageChange('close');
+              this.fetchPhistoryData(hn);
+              this.onMessageChange('close');
+            });
+            }else{
+              this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
+                duration:3000,
+                horizontalPosition: 'center',
+                verticalPosition: 'bottom',
+                panelClass:['error-snackbar']
+              }).afterDismissed().subscribe(() => {
+                // this.onMessageChange('close');
+                // this.initForm();
+              });
+            }
+      }
+
+    } catch (error: any) {
+      // Handle error during form submission
+      console.error(error);
+      this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
+        duration:3000,
+        horizontalPosition: 'center',
+        verticalPosition: 'bottom',
+        panelClass:['error-snackbar']
+      }).afterDismissed().subscribe(() => {
+        // this.onMessageChange('close');
+        // this.initForm();
+      });
+    }
+  }
 
   // ฟอร์มเพิ่ม
   initForm() {
@@ -201,15 +261,14 @@ export class DashboardUserComponent implements OnInit{
       patient_title: new FormControl('', [Validators.required]),
       patient_firstname: new FormControl('', [Validators.required]),
       patient_surname: new FormControl('', [Validators.required]),
-      patient_tel: new FormControl('',[]),
-      patient_cid: new FormControl(''),
+      patient_tel: new FormControl('',[Validators.pattern(/^[0-9]{10}$/)]),
+      patient_cid: new FormControl('',[Validators.pattern(/^[0-9]{13}$/)]),
       patient_addr: new FormControl(''),
     });
   }
 
   // ฟอร์มแก้ไข
   updateForm(data:any) {
-    console.log(data);
     // this.codeUser.set(data.user_code);
     this.formGroupData.patchValue({
       patient_title:data.patient_title,
@@ -225,11 +284,12 @@ export class DashboardUserComponent implements OnInit{
 
   }
 
+
   async fetchData(hn:string) {
-    console.log(hn);
+
     try {
       const result = await this._patientServie.readatientByHn(hn);
-      console.log(result);
+
       this.data = result;
       this.updateForm(result);
       // return this.data;
@@ -240,6 +300,32 @@ export class DashboardUserComponent implements OnInit{
       console.log('Loading success....')
     }
   }
+
+  async fetchPhistoryData(hn:string) {
+
+    let response: any;
+    try {
+      response = await this._phistoryServie.readPhistoryByHn(hn);
+
+      // this.dataSource.data = response.result;
+      this._data = response;
+      // return this.data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      throw error;
+    } finally {
+      console.log('Loading success....')
+    }
+
+    this.dataSource = response;
+  }
+
+  //ฟังก์ชั่น: ปีภาษาไทย
+  formatDateThai(date: Date): string {
+    // return moment(date).format("LL"); // Customize the format as needed
+    return moment(date).format("ll"); // Customize the format as needed
+  }
+
 
   onNoClick(): void {
 

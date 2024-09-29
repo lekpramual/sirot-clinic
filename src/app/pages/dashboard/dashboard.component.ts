@@ -61,14 +61,16 @@ export default class DashboardComponent  implements OnInit {
       this.formId.set('HN00000');
     }else if($event === 'close'){
       this.isOpened.set(false);
-      console.log('close...');
+
       this.formId.set('HN00000');
+      this.fetchData();
+    }else if($event === 'reset'){
       this.fetchData();
     }
   }
 
   onFormData($event:any){
-    console.log($event);
+
     this.formId.set($event);
   }
 
