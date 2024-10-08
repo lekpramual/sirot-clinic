@@ -428,7 +428,7 @@ async fn read_patients() -> Result<Vec<Patient>, String> {
       "SELECT
           p.patient_hn AS hn,
           CONCAT( p.patient_title, p.patient_fname, ' ', p.patient_lname ) AS name,
-          p.patient_tel AS tel,
+          IFNULL(p.patient_tel,'-') AS tel,
           IFNULL(MAX(s.phistory_date),'-') AS last_date
         FROM
             patient AS p
@@ -461,9 +461,9 @@ async fn read_patient_hn(hn: String) -> Result<Option<PatientById>,String> {
             patient_title,
             patient_fname,
             patient_lname,
-            patient_tel,
-            patient_cid,
-            patient_addr
+            IFNULL(patient_tel,'') AS patient_tel,
+            IFNULL(patient_cid,'') AS patient_cid,
+            IFNULL(patient_addr,'') AS patient_addr
           FROM patient
           WHERE patient_hn = :hn",
           params! {
@@ -544,7 +544,7 @@ async fn read_phistory_hn(hn: String) -> Result<Vec<PhistoryById>,String> {
             INNER JOIN users AS s
             ON s.user_id = p.user_id
             WHERE p.patient_hn = :hn
-          ORDER BY p.phistory_date DESC",
+          ORDER BY p.phistory_date,p.phistory_time DESC",
           params! {
               "hn" => hn,
           },
@@ -600,7 +600,7 @@ async fn read_report_date(begin: String,end:String) -> Result<Vec<ReportByDate>,
         "SELECT
           p.patient_hn AS hn,
           CONCAT( p.patient_title, p.patient_fname, ' ', p.patient_lname ) AS name,
-          p.patient_tel AS tel,
+          IFNULL(patient_tel,'') AS tel,
           DATE_FORMAT(s.phistory_date, '%Y-%m-%d') AS date,
           DATE_FORMAT(s.phistory_time, '%H:%i:%s') AS time
         FROM
