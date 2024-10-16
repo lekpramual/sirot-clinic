@@ -1,0 +1,50 @@
+-- Serch by fullname
+SELECT
+	patient_id AS id,
+	CONCAT( patient_title, patient_fname, ' ', patient_lname ) AS fullname,
+	patient_tel AS tel,
+	patient_cid AS cid,
+	patient_created AS date,
+	patient_no AS no
+FROM
+	tb_patient 
+WHERE
+	CONCAT( patient_title,patient_fname, ' ', patient_lname ) LIKE '%นางแดง เสลไสย%' 
+ORDER BY
+	patient_fname,
+	patient_lname,
+	patient_created ASC;
+	
+
+-- Serch by cid
+SELECT
+	patient_id AS id,
+	CONCAT( patient_title, patient_fname, ' ', patient_lname ) AS fullname,
+	patient_tel AS tel,
+	patient_cid AS cid,
+	patient_created AS date,
+	patient_no AS no
+FROM
+	tb_patient 
+WHERE
+	patient_cid LIKE '%1461200088%' 
+ORDER BY
+	patient_fname,
+	patient_lname,
+	patient_created ASC;
+	
+	
+-- Serch by date
+SELECT
+	patient_id AS id,
+	CONCAT( patient_title, patient_fname, ' ', patient_lname ) AS fullname,
+	patient_tel AS tel,
+	patient_cid AS cid,
+	patient_created AS date,
+	patient_no AS no
+FROM
+	tb_patient 
+WHERE
+	DATE_FORMAT(patient_created,'%Y-%m-%d') = '2024-09-02'
+ORDER BY
+	patient_no ASC;
