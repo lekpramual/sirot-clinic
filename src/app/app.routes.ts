@@ -24,6 +24,10 @@ export const routes: Routes = [
         loadComponent : (() => import("../app/pages/dashboard/dashboard.component")),
       },
       {
+        path: 'patient',
+        loadComponent : (() => import("../app/pages/patient/patient.component")),
+      },
+      {
         path: 'users',
         loadComponent : (() => import("../app/pages/users/users.component")),
       },{
