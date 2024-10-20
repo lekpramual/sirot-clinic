@@ -53,6 +53,19 @@ struct PatientById {
 }
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
+struct PatientSearchName {
+
+    patient_title: String,
+    patient_fname: String,
+    patient_lname: String,
+    patient_tel: String,
+    patient_cid:String,
+    patient_created:String,
+    patient_no:u32
+
+}
+
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct PhistoryById {
   phistory_date: String,
   phistory_time: String,
@@ -623,6 +636,113 @@ async fn read_report_date(begin: String,end:String) -> Result<Vec<ReportByDate>,
     Ok(_reports)
 }
 
+//  patient new
+#[command]
+async fn read_patient_search_name(name: String) -> Result<Vec<PatientSearchName>,String> {
+  // println!("User ID: {}", user_id);
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+              Ok(conn) => conn,
+              Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+          };
+
+    let search_pattern = format!("%{}%", name); // Prepare the search pattern
+    let _patient: Vec<PatientSearchName> = match conn.exec_map(
+        "SELECT
+            patient_title,
+            patient_fname,
+            patient_lname,
+            IFNULL(patient_tel,'') AS patient_tel,
+            IFNULL(patient_cid,'') AS patient_cid,
+            DATE_FORMAT(patient_created, '%Y-%m-%d') AS patient_created,
+            patient_no
+          FROM tb_patient
+          WHERE CONCAT( patient_title,patient_fname, ' ', patient_lname ) LIKE :search
+          ORDER BY
+            CONCAT(patient_title,patient_fname, ' ', patient_lname),
+            patient_created ASC",
+          params! {
+              "search" => &search_pattern,
+          },
+          |(patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no)| PatientSearchName {patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no },
+    ){
+              Ok(_patient) => _patient,
+              Err(err) => return Err(format!("Failed to execute query: {}", err)),
+          };
+
+    Ok(_patient)
+}
+
+#[command]
+async fn read_patient_search_cid(cid: String) -> Result<Vec<PatientSearchName>,String> {
+  // println!("User ID: {}", user_id);
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+              Ok(conn) => conn,
+              Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+          };
+
+    let search_pattern = format!("%{}%", cid); // Prepare the search pattern
+    let _patient: Vec<PatientSearchName> = match conn.exec_map(
+        "SELECT
+            patient_title,
+            patient_fname,
+            patient_lname,
+            IFNULL(patient_tel,'') AS patient_tel,
+            IFNULL(patient_cid,'') AS patient_cid,
+            DATE_FORMAT(patient_created, '%Y-%m-%d') AS patient_created,
+            patient_no
+          FROM tb_patient
+          WHERE patient_cid LIKE :search
+          ORDER BY
+            CONCAT(patient_title,patient_fname, ' ', patient_lname),
+            patient_created ASC",
+          params! {
+              "search" => &search_pattern,
+          },
+          |(patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no)| PatientSearchName {patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no },
+    ){
+              Ok(_patient) => _patient,
+              Err(err) => return Err(format!("Failed to execute query: {}", err)),
+          };
+
+    Ok(_patient)
+}
+
+#[command]
+async fn read_patient_search_date(date: String) -> Result<Vec<PatientSearchName>,String> {
+  // println!("User ID: {}", user_id);
+    let pool = connect_to_mysql().await?;
+    let mut conn = match pool.get_conn() {
+              Ok(conn) => conn,
+              Err(err) => return Err(format!("Failed to connect to the database: {}", err)),
+          };
+
+    let search_pattern = format!("%{}%", date); // Prepare the search pattern
+    let _patient: Vec<PatientSearchName> = match conn.exec_map(
+        "SELECT
+            patient_title,
+            patient_fname,
+            patient_lname,
+            IFNULL(patient_tel,'') AS patient_tel,
+            IFNULL(patient_cid,'') AS patient_cid,
+            DATE_FORMAT(patient_created, '%Y-%m-%d') AS patient_created,
+            patient_no
+          FROM tb_patient
+          WHERE DATE_FORMAT(patient_created,'%Y-%m-%d') LIKE :search
+          ORDER BY patient_no ASC",
+          params! {
+              "search" => &search_pattern,
+          },
+          |(patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no)| PatientSearchName {patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no },
+    ){
+              Ok(_patient) => _patient,
+              Err(err) => return Err(format!("Failed to execute query: {}", err)),
+          };
+
+    Ok(_patient)
+}
+
 
 
 fn main() {
@@ -639,7 +759,10 @@ fn main() {
       update_patient_hn,
       read_phistory_hn,
       create_phistory,
-      read_report_date
+      read_report_date,
+      read_patient_search_name,
+      read_patient_search_cid,
+      read_patient_search_date
     ])
     .run(tauri::generate_context!())
     .expect("error while running tauri application");

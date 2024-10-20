@@ -35,21 +35,10 @@ export default class PatientComponent  implements OnInit {
 
 
   ngOnInit(): void {
-    this.fetchData();
+
   }
 
-  async fetchData() {
-    try {
-      const result:any = await this._patientServie.readPatients();
-      this.data = result;
-      // return this.data;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    } finally {
-      console.log('Loading success....')
-    }
-  }
+
 
   openSide(){
     this.isOpened.set(!this.isOpened)
@@ -63,9 +52,9 @@ export default class PatientComponent  implements OnInit {
       this.isOpened.set(false);
 
       this.formId.set('HN00000');
-      this.fetchData();
+
     }else if($event === 'reset'){
-      this.fetchData();
+
     }
   }
 

@@ -58,4 +58,31 @@ export class PatientServie {
       throw error;
     }
   }
+
+  async readPatientSearchName(name:string){
+    try {
+      return await invoke('read_patient_search_name',{name:name});
+    } catch (error) {
+      console.error("Error read users:", error);
+      throw error;
+    }
+  }
+
+  async readPatientSearchCid(cid:string){
+    try {
+      return await invoke('read_patient_search_cid',{cid:cid});
+    } catch (error) {
+      console.error("Error read users:", error);
+      throw error;
+    }
+  }
+
+  async readPatientSearchDate(date:string){
+    try {
+      return await invoke('read_patient_search_date',{date:date});
+    } catch (error) {
+      console.error("Error read users:", error);
+      throw error;
+    }
+  }
 }

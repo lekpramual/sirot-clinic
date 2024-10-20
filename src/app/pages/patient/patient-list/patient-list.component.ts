@@ -13,7 +13,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TPatient } from '@core/interfaces/patient.interfaces';
-import { Subject } from 'rxjs';
+import { single, Subject, timeout } from 'rxjs';
 import { MatPaginator, MatPaginatorModule,MatPaginatorIntl } from "@angular/material/paginator";
 import { getThaiPaginatorIntl } from '@core/components/thai-paginator-intl';
 import { PhistoryServie } from '@core/services/phistory.service';
@@ -21,7 +21,13 @@ import { AuthService } from '@core/services/auth.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import moment from 'moment';
 import 'moment/locale/th';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelectChange, MatSelectModule } from '@angular/material/select';
+import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
+import { MomentDateAdapter } from '@angular/material-moment-adapter';
+import { MY_FORMATS } from '@core/components/custom-date-format';
+import { PatientServie } from '@core/services/patient.service';
 
 export interface PeriodicElement {
   name: string;
@@ -43,10 +49,6 @@ export interface UserList {
 
 }
 
-const users:UserList[] = [
-  {emp_id:1,emp_code:'HN00001',emp_name:'นายทดสอบ ทดสอบ',emp_tel:'0832549551',emp_date:'23 ส.ค. 2567'},
-  {emp_id:2,emp_code:'HN00002',emp_name:'นายทดสอบ2 ทดสอบ2',emp_tel:'0832512345',emp_date:'23 ส.ค. 2567'}
-]
 
 
 @Component({
@@ -70,15 +72,25 @@ const users:UserList[] = [
     MatTooltipModule,
     MatPaginatorModule,
     MatSelectModule,
+    MatDatepickerModule,
+    MatProgressSpinnerModule,
     CommonModule
   ],
   providers:[
     { provide: MatPaginatorIntl, useValue: getThaiPaginatorIntl() },
+    provideNativeDateAdapter(),
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE],
+    },
+    { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS }, // Provide custom date formats
+    { provide: MAT_DATE_LOCALE, useValue: 'th' },
   ]
 
 })
 
-export default class PatientListComponent{
+export default class PatientListComponent implements OnInit{
 
   @ViewChild(MatPaginator, { static: true }) paginator!: MatPaginator;
 
@@ -86,7 +98,15 @@ export default class PatientListComponent{
   sideCreate = signal(false);
   searchValue = "";
   userId: any = "";
-  searchTerm = new Subject<string>();
+  // searchTerm = new Subject<string>();
+  currentDate = new Date();
+
+  searchTerm = signal("");
+  isLoading  = true;
+
+  // date max min
+  maxDate!: Date;
+  minDate!: Date;
 
   @Input() set sideopen(val:boolean){
     this.sideCreate.set(val)
@@ -117,13 +137,13 @@ export default class PatientListComponent{
     //  this.sideCreate.set(true)
    }
 
-  displayedColumns = ['hn','name','tel','last_date','actions'];
+  displayedColumns = ['name','patient_created','patient_no','patient_tel','patient_cid','actions'];
 
   // dataSource = UserData;
   dataSource = new MatTableDataSource<TPatient>();
   // dataSource!: MatTableDataSource<UserList>;
 
-  constructor(private _authService:AuthService,private _phistoryServie: PhistoryServie,private _snackBar: MatSnackBar) {
+  constructor(private _authService:AuthService,private _phistoryServie: PhistoryServie,private _patientServie: PatientServie,private _snackBar: MatSnackBar) {
     // this.dataSource = new MatTableDataSource(users);
 
     moment.updateLocale('th', {
@@ -143,33 +163,39 @@ export default class PatientListComponent{
     });
 
     this.initForm();
+
+     // Set the max and min date based on the current year
+     const currentYear = new Date().getFullYear();
+     this.maxDate = new Date(currentYear + 1, 11, 31); // December 31 of next year
+     this.minDate = new Date(currentYear - 1, 0, 1); // January 1 of the current year
   }
 
   // ฟอร์มเพิ่ม
   initForm() {
     this.searchForm = new FormGroup({
       searchOption: new FormControl('name',[Validators.required]),
-      searchText: new FormControl('', [Validators.required])
+      searchText: new FormControl('', [Validators.required]),
+      searchCid: new FormControl(''),
+      searchDate: new FormControl('')
     });
   }
 
-  async ngOnInit() {
+  async ngOnInit()  {
     // this.initForm();
     this.userId = await this._authService.getUserId();
 
+
+
+
+    setTimeout(() => {
+      console.log('isloading false ...')
+      console.log('isloading false ...')
+      this.isLoading = false;
+    },2000)
   }
 
   ngAfterViewInit() {
     this.dataSource.paginator = this.paginator;
-  }
-
-  async fetchData() {
-    this.dataSource.data = this._data;
-  }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
   clickedJob(row:any){
@@ -231,13 +257,7 @@ export default class PatientListComponent{
   }
 
 
-  clearSearch() {
-    this.searchValue = "";
-    this.searchTerm.next("");
 
-    this.dataSource.filter = '';
-
-  }
   //ฟังก์ชั่น: ปีภาษาไทย
   formatDateThai(date: Date): string {
     // return moment(date).format("LL"); // Customize the format as needed
@@ -248,16 +268,130 @@ export default class PatientListComponent{
     if (this.searchForm.valid) {
       const formValue = this.searchForm.value;
       console.log('Search triggered with:', formValue);
-      // You can handle search logic here, such as making an API call
+      let _searchOption =this.searchForm.value.searchOption;
+      let _searchText =this.searchForm.value.searchText;
+      let _searchCid =this.searchForm.value.searchCid;
+      let _searchDate = this.searchForm.value.searchDate != ''? moment(this.searchForm.value.searchDate).add('year', (-543)).format("YYYY-MM-DD") : '';
+      console.log('>>>>> _searchOption',_searchOption);
+      console.log('>>>>> _searchText',_searchText);
+      console.log('>>>>> _searchCid',_searchCid);
+      console.log('>>>>> _searchDate',_searchDate);
+
+      if(_searchOption == 'name'){
+        console.log(_searchOption)
+        // this._patientServie.readPatientSearchName(_searchText);
+
+        this.fetchDataSearchName(_searchText);
+      }else if(_searchOption == 'cid'){
+        this.fetchDataSearchCid(_searchCid);
+      }else{
+        this.fetchDataSearchDate(_searchDate);
+      }
+    }
+  }
+
+  async fetchDataSearchName(name:string) {
+    try {
+      this.isLoading = true;
+      const result:any = await this._patientServie.readPatientSearchName(name);
+      this.dataSource.data = result;
+      // return this.data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      this.isLoading = false;
+      throw error;
+    } finally {
+      console.log('Loading success....');
+      setTimeout(() => {
+        this.isLoading = false;
+      }, 3000);
+
+    }
+  }
+
+
+  async fetchDataSearchCid(cid:string) {
+    try {
+      this.isLoading = true;
+      const result:any = await this._patientServie.readPatientSearchCid(cid);
+      this.dataSource.data = result;
+      // return this.data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      this.isLoading = false;
+      throw error;
+    } finally {
+      console.log('Loading success....');
+      setTimeout(() => {
+        this.isLoading = false;
+      }, 3000);
+
+    }
+  }
+
+  async fetchDataSearchDate(date:string) {
+    try {
+      this.isLoading = true;
+      const result:any = await this._patientServie.readPatientSearchDate(date);
+      this.dataSource.data = result;
+      // return this.data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      this.isLoading = false;
+      throw error;
+    } finally {
+      console.log('Loading success....');
+      setTimeout(() => {
+        this.isLoading = false;
+      }, 3000);
+
     }
   }
 
   onClear() {
-    this.searchForm.reset();
+    // this.searchForm.reset();
 
     this.initForm();
-
+    this.dataSource.data = [];
+    this.isLoading = false;
   }
 
+   // Method to handle the selection change event
+   onSelectionChange(event: MatSelectChange) {
+    const _selectValue = event.value;
+    console.log('Selected value:', _selectValue);
+    // You can add more logic here if needed
+    if(_selectValue == 'cid'){
 
+      this.searchForm.controls["searchCid"].setValidators([Validators.pattern(/^[0-9]{13}$/)]);
+      this.searchForm.get('searchText')?.setValue('');
+      this.searchForm.controls["searchText"].clearValidators();
+      this.searchForm.get('searchDate')?.setValue('');
+      this.searchForm.controls["searchDate"].clearValidators();
+      // searchCid: new FormControl('',[Validators.pattern(/^[0-9]{13}$/)]),
+    }else if(_selectValue == 'date'){
+      this.searchForm.controls["searchDate"].setValidators([
+        Validators.required,
+      ]);
+      this.searchForm.get('searchCid')?.setValue('');
+      this.searchForm.controls["searchCid"].clearValidators();
+      this.searchForm.get('searchText')?.setValue('');
+      this.searchForm.controls["searchText"].clearValidators();
+
+    }else{
+      this.searchForm.controls["searchText"].setValidators([
+        Validators.required,
+      ]);
+
+      this.searchForm.get('searchCid')?.setValue('');
+      this.searchForm.controls["searchCid"].clearValidators();
+      this.searchForm.get('searchDate')?.setValue('');
+      this.searchForm.controls["searchDate"].clearValidators();
+    }
+
+    this.searchForm.controls["searchText"].updateValueAndValidity();
+    this.searchForm.controls["searchCid"].updateValueAndValidity();
+    this.searchForm.controls["searchDate"].updateValueAndValidity();
+
+  }
 }
