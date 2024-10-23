@@ -17,12 +17,9 @@ export const routes: Routes = [
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'dashboard',
+        redirectTo: 'patient',
       },
-      {
-        path: 'dashboard',
-        loadComponent : (() => import("../app/pages/dashboard/dashboard.component")),
-      },
+
       {
         path: 'patient',
         loadComponent : (() => import("../app/pages/patient/patient.component")),

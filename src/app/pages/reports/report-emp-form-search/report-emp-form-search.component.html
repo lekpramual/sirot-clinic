@@ -84,15 +84,7 @@
             </div>
           </div>
           <table mat-table [dataSource]="dataSource" >
-            <ng-container matColumnDef="hn">
-              <th mat-header-cell mat-header-cell *matHeaderCellDef>
 
-                <span class="mat-subtitle-2">HN</span>
-              </th>
-              <td mat-cell mat-cell *matCellDef="let element">
-                <span class="mat-subtitle-1">{{ element.hn }}</span>
-                 </td>
-            </ng-container>
             <ng-container matColumnDef="tel">
               <th mat-header-cell mat-header-cell *matHeaderCellDef>
 
@@ -114,10 +106,10 @@
             <ng-container matColumnDef="time">
               <th mat-header-cell mat-header-cell *matHeaderCellDef>
 
-                <span class="mat-subtitle-2">เวลา</span>
+                <span class="mat-subtitle-2">คิว</span>
               </th>
               <td mat-cell mat-cell *matCellDef="let element">
-                <span class="mat-subtitle-1">{{ element.time }} น.</span>
+                <span class="mat-subtitle-1">{{ element.time }}</span>
                  </td>
             </ng-container>
             <ng-container matColumnDef="name">

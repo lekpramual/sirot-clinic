@@ -29,28 +29,6 @@ import { MomentDateAdapter } from '@angular/material-moment-adapter';
 import { MY_FORMATS } from '@core/components/custom-date-format';
 import { PatientServie } from '@core/services/patient.service';
 
-export interface PeriodicElement {
-  name: string;
-  type:string;
-  type_id:number;
-  equipment: string;
-  in: string;
-  out: string;
-  date:string;
-  time:string;
-}
-
-export interface UserList {
-  emp_id:number;
-  emp_code:string;
-  emp_name:string;
-  emp_tel:string;
-  emp_date:string;
-
-}
-
-
-
 @Component({
   selector: 'app-patient-list',
   standalone: true,
@@ -108,17 +86,53 @@ export default class PatientListComponent implements OnInit{
   maxDate!: Date;
   minDate!: Date;
 
+  // ฟอร์มเริ่มต้น
+  formPatient = signal({
+      action:'create',
+      patient_cid: "",
+      patient_created: "",
+      patient_fname: "",
+      patient_id: "",
+      patient_lname: "",
+      patient_no: "",
+      patient_tel: "",
+      patient_title: ""
+  })
+
+  _searchPatient = signal({
+    searchOption:'name',
+    searchValue:'',
+  })
+
   @Input() set sideopen(val:boolean){
     this.sideCreate.set(val)
   }
 
   @Input() set tbData(val:any){
-    // this._data = val;
+    this._data = val;
+    console.log('tbData >>>',val);
     this.dataSource.data = val;
+  }
+
+  @Input() set searchPatient(val:any){
+    // this._data = val;
+    // this.dataSource.data = val;
+    // TODO
+    console.log('>>>>',val);
+    this._searchPatient.update((result) => ({
+      ...result,
+      searchOption:val.searchOption,
+      searchValue:val.searchValue
+    }));
+
+    this.initForm();
   }
 
    // Output property to send data back to the parent
    @Output() messageChange = new EventEmitter<string>();
+
+   @Output() formChangeSearch = new EventEmitter<string>();
+
 
    @Output() formChange = new EventEmitter<[]>();
 
@@ -133,7 +147,25 @@ export default class PatientListComponent implements OnInit{
    // Method to handle changes and emit the new value
    onMessageChange() {
 
-     this.messageChange.emit('open');
+    this.formPatient.update((_patient) => ({
+      ..._patient,
+      action:'create',
+      patient_cid: "",
+      patient_created: "",
+      patient_fname: "",
+      patient_id: "",
+      patient_lname: "",
+      patient_no: "",
+      patient_tel: "",
+      patient_title: ""
+    }))
+
+
+
+    this.messageChange.emit('open');
+    console.log('create >>>', this.formPatient())
+    const rowPatient:any = this.formPatient();
+    this.formChange.emit(rowPatient);
     //  this.sideCreate.set(true)
    }
 
@@ -143,7 +175,7 @@ export default class PatientListComponent implements OnInit{
   dataSource = new MatTableDataSource<TPatient>();
   // dataSource!: MatTableDataSource<UserList>;
 
-  constructor(private _authService:AuthService,private _phistoryServie: PhistoryServie,private _patientServie: PatientServie,private _snackBar: MatSnackBar) {
+  constructor(private _authService:AuthService,private _patientServie: PatientServie,private _snackBar: MatSnackBar) {
     // this.dataSource = new MatTableDataSource(users);
 
     moment.updateLocale('th', {
@@ -162,7 +194,7 @@ export default class PatientListComponent implements OnInit{
         ),
     });
 
-    this.initForm();
+
 
      // Set the max and min date based on the current year
      const currentYear = new Date().getFullYear();
@@ -172,21 +204,37 @@ export default class PatientListComponent implements OnInit{
 
   // ฟอร์มเพิ่ม
   initForm() {
-    this.searchForm = new FormGroup({
-      searchOption: new FormControl('name',[Validators.required]),
-      searchText: new FormControl('', [Validators.required]),
-      searchCid: new FormControl(''),
-      searchDate: new FormControl('')
-    });
+    console.log(this._searchPatient().searchOption);
+
+    const _option = this._searchPatient().searchOption;
+    if(_option == 'name'){
+      this.searchForm = new FormGroup({
+        searchOption: new FormControl(_option,[Validators.required]),
+        searchText: new FormControl(this._searchPatient().searchValue, [Validators.required]),
+        searchCid: new FormControl(''),
+        searchDate: new FormControl('')
+      });
+    }else if(_option == 'date'){
+      this.searchForm = new FormGroup({
+        searchOption: new FormControl(_option,[Validators.required]),
+        searchText: new FormControl(''),
+        searchCid: new FormControl(''),
+        searchDate: new FormControl(this._searchPatient().searchValue, [Validators.required])
+      });
+    }else{
+      this.searchForm = new FormGroup({
+        searchOption: new FormControl(_option,[Validators.required]),
+        searchText: new FormControl(''),
+        searchCid: new FormControl(this._searchPatient().searchValue, [Validators.required]),
+        searchDate: new FormControl('')
+      });
+    }
+
   }
 
   async ngOnInit()  {
     // this.initForm();
     this.userId = await this._authService.getUserId();
-
-
-
-
     setTimeout(() => {
       console.log('isloading false ...')
       console.log('isloading false ...')
@@ -198,55 +246,49 @@ export default class PatientListComponent implements OnInit{
     this.dataSource.paginator = this.paginator;
   }
 
-  clickedJob(row:any){
+  updatePatient(row:any){
     this.onMessageChange();
-    this.formChange.emit(row.hn);
+    // const _patient = this.formPatient();
+
+    this.formPatient.update((_patient) => ({
+      ..._patient,
+      action:"update",
+      patient_cid: row.patient_cid,
+      patient_created: row.patient_created,
+      patient_fname: row.patient_fname,
+      patient_id: row.patient_id,
+      patient_lname: row.patient_lname,
+      patient_no: row.patient_no,
+      patient_tel: row.patient_tel,
+      patient_title: row.patient_title
+    }))
+
+    console.log('update >>>', this.formPatient())
+    const rowPatient:any = this.formPatient();
+    this.formChange.emit(rowPatient);
   }
 
-  async btnPhistory(hn:string) {
-    try {
+  copyPatient(row:any){
+    this.onMessageChange();
 
-      let _userId:number = parseInt(this.userId);
+    this.formPatient.set({
+      ...this.formPatient,
+      action:"copy",
+      patient_cid: row.patient_cid,
+      patient_created: row.patient_created,
+      patient_fname: row.patient_fname,
+      patient_id: row.patient_id,
+      patient_lname: row.patient_lname,
+      patient_no: row.patient_no,
+      patient_tel: row.patient_tel,
+      patient_title: row.patient_title
+    })
 
-
-      if(_userId > 0){
-        const result = await this._phistoryServie.createPhistory(hn,_userId);
-          if(result === 'ok'){
-            this._snackBar.open(`ส่งตรวจข้อมูลเรียบร้อย`, '', {
-              duration:1500,
-              horizontalPosition: 'center',
-              verticalPosition: 'bottom',
-              panelClass:['success-snackbar']
-            }).afterDismissed().subscribe(() => {
-              this.messageChange.emit('reset');
-            });
-            }else{
-              this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
-                duration:3000,
-                horizontalPosition: 'center',
-                verticalPosition: 'bottom',
-                panelClass:['error-snackbar']
-              }).afterDismissed().subscribe(() => {
-                // this.onMessageChange('close');
-                // this.initForm();
-              });
-            }
-      }
-
-    } catch (error: any) {
-      // Handle error during form submission
-      console.error(error);
-      this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
-        duration:3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'bottom',
-        panelClass:['error-snackbar']
-      }).afterDismissed().subscribe(() => {
-        // this.onMessageChange('close');
-        // this.initForm();
-      });
-    }
+    console.log('copy >>>', this.formPatient());
+    const rowPatient:any = this.formPatient();
+    this.formChange.emit(rowPatient);
   }
+
 
   onButtonClick(row: any, event: Event) {
     event.stopPropagation();
@@ -272,20 +314,30 @@ export default class PatientListComponent implements OnInit{
       let _searchText =this.searchForm.value.searchText;
       let _searchCid =this.searchForm.value.searchCid;
       let _searchDate = this.searchForm.value.searchDate != ''? moment(this.searchForm.value.searchDate).add('year', (-543)).format("YYYY-MM-DD") : '';
-      console.log('>>>>> _searchOption',_searchOption);
-      console.log('>>>>> _searchText',_searchText);
-      console.log('>>>>> _searchCid',_searchCid);
-      console.log('>>>>> _searchDate',_searchDate);
 
       if(_searchOption == 'name'){
         console.log(_searchOption)
         // this._patientServie.readPatientSearchName(_searchText);
-
-        this.fetchDataSearchName(_searchText);
+        const _formSearch:any = {
+          searchOption:_searchOption,
+          searchValue:_searchText
+        }
+        this.formChangeSearch.emit(_formSearch);
+        // this.fetchDataSearchName(_searchText);
       }else if(_searchOption == 'cid'){
-        this.fetchDataSearchCid(_searchCid);
+        // this.fetchDataSearchCid(_searchCid);
+        const _formSearch:any = {
+          searchOption:_searchOption,
+          searchValue:_searchCid
+        }
+        this.formChangeSearch.emit(_formSearch)
       }else{
-        this.fetchDataSearchDate(_searchDate);
+        // this.fetchDataSearchDate(_searchDate);
+        const _formSearch:any = {
+          searchOption:_searchOption,
+          searchValue:_searchDate
+        }
+        this.formChangeSearch.emit(_formSearch)
       }
     }
   }
@@ -353,7 +405,8 @@ export default class PatientListComponent implements OnInit{
 
     this.initForm();
     this.dataSource.data = [];
-    this.isLoading = false;
+    // this.isLoading = false;
+    this.messageChange.emit('reset');
   }
 
    // Method to handle the selection change event

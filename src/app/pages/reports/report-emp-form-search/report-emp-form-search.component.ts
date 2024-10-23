@@ -117,7 +117,7 @@ export class ReportEmpFormSearchComponent implements OnInit {
 
   filteredOptions!: Observable<any[]>;
 
-  displayedColumns: string[] = ['hn','name','tel','date','time'];
+  displayedColumns: string[] = ['name','tel','date','time'];
   dataSource:any = [];
 
   // date max min

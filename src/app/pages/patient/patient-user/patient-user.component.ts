@@ -15,7 +15,7 @@ import { MatSlideToggleModule, _MatSlideToggleRequiredValidatorModule } from '@a
 import { Observable, map, startWith } from 'rxjs';
 import {MatTabsModule} from '@angular/material/tabs';
 import { MatTableModule } from '@angular/material/table';
-import { MatRippleModule } from '@angular/material/core';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatRippleModule, provideNativeDateAdapter } from '@angular/material/core';
 import { AuthService } from '@core/services/auth.service';
 import { PatientServie } from '@core/services/patient.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -26,6 +26,9 @@ import { NgxMaskDirective, provideNgxMask } from 'ngx-mask';
 import { PhistoryServie } from '@core/services/phistory.service';
 import moment from 'moment';
 import 'moment/locale/th';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatMomentDateModule, MomentDateAdapter } from '@angular/material-moment-adapter';
+import { MY_FORMATS } from '@core/components/custom-date-format';
 
 interface Employee {
   patient_id: number;
@@ -59,36 +62,69 @@ interface Employee {
     MatTabsModule,
     MatTableModule,
     MatRippleModule,
-    NgxMaskDirective
+    NgxMaskDirective,
+    MatDatepickerModule,
+    MatMomentDateModule
   ],
   providers:[
-    provideNgxMask()
+    provideNgxMask(),
+    provideNativeDateAdapter(),
+    {
+      provide: DateAdapter,
+      useClass: MomentDateAdapter,
+      deps: [MAT_DATE_LOCALE],
+    },
+    { provide: MAT_DATE_FORMATS, useValue: MY_FORMATS }, // Provide custom date formats
+    { provide: MAT_DATE_LOCALE, useValue: 'th' }, // Set the locale to Thai
   ]
 })
 export class PatientUserComponent implements OnInit{
 
   sideCreate = signal(false);
   _formId = signal('HN00000');
+    _formPatient = signal({
+      action:'create',
+      patient_cid: "",
+      patient_created: "",
+      patient_fname: "",
+      patient_id: "",
+      patient_lname: "",
+      patient_no: "",
+      patient_tel: "",
+      patient_title: ""
+  })
+
   data:any;
   _data:any;
 
+   // date max min
+   maxDate!: Date;
+   minDate!: Date;
 
   @Input() set sideopen(val:boolean){
 
     this.sideCreate.set(val)
   }
 
+  @Input() set formPatient(val:any){
+
+    console.log('>>>> val',val)
+    this._formPatient.set(val);
+
+    this.initForm();
+  }
+
   @Input() set formId(val:any){
 
     this._formId.set(val);
 
-    if(this._formId() != 'HN00000'){
-      // ฟอร์มแก้ไข
-      this.fetchData(val);
-      this.fetchPhistoryData(val);
-    }
+    // if(this._formId() != 'HN00000'){
+    //   // ฟอร์มแก้ไข
+    //   this.fetchData(val);
+    //   this.fetchPhistoryData(val);
+    // }
 
-    this.initForm();
+    // this.initForm();
   }
 
   // Output property to send data back to the parent
@@ -145,59 +181,63 @@ export class PatientUserComponent implements OnInit{
         let patientLname = this.formGroupData.value.patient_surname;
         let patientTel = this.formGroupData.value.patient_tel;
         let patientCid = this.formGroupData.value.patient_cid;
-        let patientAddr = this.formGroupData.value.patient_addr;
-        let _userId:number = parseInt(this.userId);
-        let hn:string = this._formId();
+        let patientDate = moment(this.formGroupData.value.patient_date).add('year',-543).format("YYYY-MM-DD");
+        let patientNo = this.formGroupData.value.patient_no;
 
-        if(hn != 'HN00000'){
-          const result = await this._patientServie.updatepatientByHn(patientTitle,patientFname,patientLname,patientTel,patientCid,patientAddr,_userId,hn);
+        const action = this._formPatient().action;
+        console.log('action >>>',action);
+        if(action == 'update'){
+          const patientId = parseInt(this._formPatient().patient_id);
 
-            if(result === 'ok'){
-              this._snackBar.open(`ปรับปรุงข้อมูลเรียบร้อย`, '', {
+          const result = await this._patientServie.updatepatientById(patientTitle,patientFname,patientLname,patientTel,patientCid,patientDate,patientNo,patientId);
+
+          if(result === 'ok'){
+              this._snackBar.open(`บันทึกข้อมูลเรียบร้อย`, '', {
                 duration:1500,
                 horizontalPosition: 'center',
                 verticalPosition: 'bottom',
                 panelClass:['success-snackbar']
               }).afterDismissed().subscribe(() => {
                 this.onMessageChange('close');
+                // this.initForm();
               });
-              }else{
-                this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
-                  duration:3000,
-                  horizontalPosition: 'center',
-                  verticalPosition: 'bottom',
-                  panelClass:['error-snackbar']
-                }).afterDismissed().subscribe(() => {
-                  // this.onMessageChange('close');
-                  this.initForm();
-                });
-              }
+          }else{
+            this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
+              duration:3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+              panelClass:['error-snackbar']
+            }).afterDismissed().subscribe(() => {
+              // this.onMessageChange('close');
+              // this.initForm();
+            });
+          }
         }else{
+          const result = await this._patientServie.createPatient(patientTitle,patientFname,patientLname,patientTel,patientCid,patientDate,patientNo);
 
-          const result = await this._patientServie.createPatient(patientTitle,patientFname,patientLname,patientTel,patientCid,patientAddr,_userId);
-
-            if(result === 'ok'){
-                this._snackBar.open(`บันทึกข้อมูลเรียบร้อย`, '', {
-                  duration:1500,
-                  horizontalPosition: 'center',
-                  verticalPosition: 'bottom',
-                  panelClass:['success-snackbar']
-                }).afterDismissed().subscribe(() => {
-                  this.onMessageChange('close');
-                  this.initForm();
-                });
-              }else{
-                this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
-                  duration:3000,
-                  horizontalPosition: 'center',
-                  verticalPosition: 'bottom',
-                  panelClass:['error-snackbar']
-                }).afterDismissed().subscribe(() => {
-                  // this.onMessageChange('close');
-                  this.initForm();
-                });
-              }
+          if(result === 'ok'){
+              this._snackBar.open(`บันทึกข้อมูลเรียบร้อย`, '', {
+                duration:1500,
+                horizontalPosition: 'center',
+                verticalPosition: 'bottom',
+                panelClass:['success-snackbar']
+              }).afterDismissed().subscribe(() => {
+                this.onMessageChange('close');
+                // this.initForm();
+              });
+          }else{
+            this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
+              duration:3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'bottom',
+              panelClass:['error-snackbar']
+            }).afterDismissed().subscribe(() => {
+              // this.onMessageChange('close');
+              // this.initForm();
+            });
+          }
         }
+
 
       } catch (error: any) {
         // Handle error during form submission
@@ -208,117 +248,45 @@ export class PatientUserComponent implements OnInit{
     }
   }
 
-  async btnPhistory() {
-    try {
-
-      let _userId:number = parseInt(this.userId);
-      let hn:string = this._formId();
-
-      if(hn != 'HN00000'){
-        const result = await this._phistoryServie.createPhistory(hn,_userId);
-          if(result === 'ok'){
-            this._snackBar.open(`ส่งตรวจข้อมูลเรียบร้อย`, '', {
-              duration:1500,
-              horizontalPosition: 'center',
-              verticalPosition: 'bottom',
-              panelClass:['success-snackbar']
-            }).afterDismissed().subscribe(() => {
-              // this.onMessageChange('close');
-              this.fetchPhistoryData(hn);
-              this.onMessageChange('close');
-            });
-            }else{
-              this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
-                duration:3000,
-                horizontalPosition: 'center',
-                verticalPosition: 'bottom',
-                panelClass:['error-snackbar']
-              }).afterDismissed().subscribe(() => {
-                // this.onMessageChange('close');
-                // this.initForm();
-              });
-            }
-      }
-
-    } catch (error: any) {
-      // Handle error during form submission
-      console.error(error);
-      this._snackBar.open('บันทึกข้อมูลผิดพลาด', '', {
-        duration:3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'bottom',
-        panelClass:['error-snackbar']
-      }).afterDismissed().subscribe(() => {
-        // this.onMessageChange('close');
-        // this.initForm();
-      });
-    }
-  }
-
   // ฟอร์มเพิ่ม
   initForm() {
-    this.formGroupData = new FormGroup({
-      patient_title: new FormControl('', [Validators.required]),
-      patient_firstname: new FormControl('', [Validators.required]),
-      patient_surname: new FormControl('', [Validators.required]),
-      patient_tel: new FormControl('',[Validators.pattern(/^[0-9]{10}$/)]),
-      patient_cid: new FormControl('',[Validators.pattern(/^[0-9]{13}$/)]),
-      patient_addr: new FormControl(''),
-    });
-  }
 
-  // ฟอร์มแก้ไข
-  updateForm(data:any) {
-    // this.codeUser.set(data.user_code);
-    this.formGroupData.patchValue({
-      patient_title:data.patient_title,
-      patient_firstname:data.patient_fname,
-      patient_surname:data.patient_lname,
-      patient_tel:data.patient_tel,
-      patient_cid:data.patient_cid,
-      patient_addr:data.patient_addr
-    });
+    console.log('>>>> formPatient',this._formPatient())
 
-    // this.formGroupData.controls["user_password"].clearValidators();
-    // this.formGroupData.controls["user_password"].updateValueAndValidity();
-
-  }
-
-
-  async fetchData(hn:string) {
-
-    try {
-      const result = await this._patientServie.readatientByHn(hn);
-
-      this.data = result;
-      this.updateForm(result);
-      // return this.data;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    } finally {
-      console.log('Loading success....')
-    }
-  }
-
-  async fetchPhistoryData(hn:string) {
-
-    let response: any;
-    try {
-      response = await this._phistoryServie.readPhistoryByHn(hn);
-
-      // this.dataSource.data = response.result;
-      this._data = response;
-      // return this.data;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    } finally {
-      console.log('Loading success....')
+    if(this._formPatient().action == 'create'){
+      this.formGroupData = new FormGroup({
+        patient_title: new FormControl(this._formPatient().patient_title, [Validators.required]),
+        patient_firstname: new FormControl(this._formPatient().patient_fname, [Validators.required]),
+        patient_surname: new FormControl(this._formPatient().patient_lname, [Validators.required]),
+        patient_tel: new FormControl(this._formPatient().patient_tel,[Validators.pattern(/^[0-9]{10}$/)]),
+        patient_cid: new FormControl(this._formPatient().patient_cid,[Validators.pattern(/^[0-9]{13}$/)]),
+        patient_date: new FormControl(this._formPatient().patient_created, [Validators.required]),
+        patient_no: new FormControl(this._formPatient().patient_no, [Validators.required]),
+      });
+    }else if(this._formPatient().action == 'update'){
+      this.formGroupData = new FormGroup({
+        patient_title: new FormControl(this._formPatient().patient_title, [Validators.required]),
+        patient_firstname: new FormControl(this._formPatient().patient_fname, [Validators.required]),
+        patient_surname: new FormControl(this._formPatient().patient_lname, [Validators.required]),
+        patient_tel: new FormControl(this._formPatient().patient_tel,[Validators.pattern(/^[0-9]{10}$/)]),
+        patient_cid: new FormControl(this._formPatient().patient_cid,[Validators.pattern(/^[0-9]{13}$/)]),
+        patient_date: new FormControl(this._formPatient().patient_created, [Validators.required]),
+        patient_no: new FormControl(this._formPatient().patient_no, [Validators.required]),
+      });
+    }else{
+      this.formGroupData = new FormGroup({
+        patient_title: new FormControl(this._formPatient().patient_title, [Validators.required]),
+        patient_firstname: new FormControl(this._formPatient().patient_fname, [Validators.required]),
+        patient_surname: new FormControl(this._formPatient().patient_lname, [Validators.required]),
+        patient_tel: new FormControl(this._formPatient().patient_tel,[Validators.pattern(/^[0-9]{10}$/)]),
+        patient_cid: new FormControl(this._formPatient().patient_cid,[Validators.pattern(/^[0-9]{13}$/)]),
+        patient_date: new FormControl(new Date(), [Validators.required]),
+        patient_no: new FormControl('', [Validators.required]),
+      });
     }
 
-    this.dataSource = response;
   }
+
 
   //ฟังก์ชั่น: ปีภาษาไทย
   formatDateThai(date: Date): string {

@@ -1,10 +1,20 @@
 <div class="row px-0 mx-0 mt-0 g-3">
   <div [class]="isOpened()?'col-lg-6 col-md-12':'col-lg-12 col-md-12' ">
-    <app-patient-list  [sideopen]="isOpened()" (messageChange)="onMessageChange($event)" (formChange)="onFormData($event)"/>
+    <app-patient-list
+    [sideopen]="isOpened()"
+    [searchPatient]="searchPatient()"
+    [tbData]="data"
+
+    (messageChange)="onMessageChange($event)"
+    (formChangeSearch)="formChangeSearch($event)"
+    (formChange)="onFormData($event)"/>
   </div>
-  <!-- @if(isOpened()){
+  @if(isOpened()){
     <div  class="col-lg-6 col-md-12">
-      <app-patient-user [sideopen]="isOpened()" [formId]="formId()"  (messageChange)="onMessageChange($event)"   />
+      <app-patient-user
+      [sideopen]="isOpened()"
+      [formPatient]="formPatient()"
+      (messageChange)="onMessageChange($event)"/>
     </div>
-  } -->
+  }
 </div>

@@ -12,11 +12,11 @@ export class PatientServie {
     patientLname:string,
     patientTel:string,
     patientCid:string,
-    patientAddr:string,
-    userId:number,
+    patientDate:string,
+    patientNo:number
   ){
     try {
-      return invoke('create_and_update_patient',{patientTitle,patientFname,patientLname,patientTel,patientCid,patientAddr,userId});
+      return invoke('create_and_update_patient',{patientTitle,patientFname,patientLname,patientTel,patientCid,patientDate,patientNo});
     } catch (error) {
       console.error("Error read users:", error);
       throw error;
@@ -41,18 +41,18 @@ export class PatientServie {
     }
   }
 
-  async updatepatientByHn(
+  async updatepatientById(
     patientTitle:string,
     patientFname:string,
     patientLname:string,
     patientTel:string,
     patientCid:string,
-    patientAddr:string,
-    userId:number,
-    hn:string
+    patientDate:string,
+    patientNo:number,
+    patientId:number
   ): Promise<any> {
     try {
-      return await invoke('update_patient_hn',{patientTitle,patientFname,patientLname,patientTel,patientCid,patientAddr,userId,hn});
+      return await invoke('update_patient_hn',{patientTitle,patientFname,patientLname,patientTel,patientCid,patientDate,patientNo,patientId});
     } catch (error) {
       console.error("Error updating user:", error);
       throw error;

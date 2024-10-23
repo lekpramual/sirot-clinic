@@ -54,7 +54,7 @@ struct PatientById {
 
 #[derive(Debug, serde::Serialize, serde::Deserialize)]
 struct PatientSearchName {
-
+    patient_id:u32,
     patient_title: String,
     patient_fname: String,
     patient_lname: String,
@@ -78,7 +78,7 @@ struct ReportByDate {
   name: String,
   tel: String,
   date: String,
-  time: String
+  time: u32
 }
 
 
@@ -367,8 +367,8 @@ async fn create_and_update_patient(
   patient_lname:String,
   patient_tel:String,
   patient_cid:String,
-  patient_addr:String,
-  user_id:u32,
+  patient_date:String,
+  patient_no:u32
 ) -> Result<String, String> {
 
     let pool = connect_to_mysql().await?;
@@ -378,16 +378,16 @@ async fn create_and_update_patient(
     };
 
     let _patient = match conn.exec_drop(
-        "INSERT INTO patient (patient_title, patient_fname, patient_lname,patient_tel,patient_cid,patient_addr, patient_created, patient_updated,user_id)
-         VALUES (:patient_title, :patient_fname, :patient_lname, :patient_tel, :patient_cid, :patient_addr , NOW(), NOW(), :user_id)",
+        "INSERT INTO tb_patient (patient_title, patient_fname, patient_lname,patient_tel,patient_cid, patient_created, patient_updated,patient_no)
+         VALUES (:patient_title, :patient_fname, :patient_lname, :patient_tel, :patient_cid , :patient_created, NOW(), :patient_no)",
         params! {
             "patient_title" => patient_title,
             "patient_fname" => patient_fname,
             "patient_lname" => patient_lname,
             "patient_tel" => patient_tel,
             "patient_cid" => patient_cid,
-            "patient_addr" => patient_addr,
-            "user_id" => user_id
+            "patient_created" => patient_date,
+            "patient_no" => patient_no
         }
     ){
         Ok(_patient) => _patient,
@@ -497,9 +497,9 @@ async fn update_patient_hn(
   patient_lname:String,
   patient_tel:String,
   patient_cid:String,
-  patient_addr:String,
-  user_id:u32,
-  hn:String
+  patient_date:String,
+  patient_no:u32,
+  patient_id:u32
 ) -> Result<String, String> {
 
     let pool = connect_to_mysql().await?;
@@ -509,34 +509,30 @@ async fn update_patient_hn(
     };
 
       let userUpdate = match  conn.exec_drop(
-        "UPDATE patient SET
+        "UPDATE tb_patient SET
           patient_title = :patient_title,
           patient_fname = :patient_fname,
           patient_lname = :patient_lname,
           patient_tel = :patient_tel,
           patient_cid = :patient_cid,
-          patient_addr = :patient_addr,
-          patient_updated = NOW(),
-          user_id = :user_id
-          WHERE patient_hn = :hn",
+          patient_created = :patient_date,
+          patient_no = :patient_no,
+          patient_updated = NOW()
+          WHERE patient_id = :patient_id",
           params! {
             "patient_title" => patient_title,
             "patient_fname" => patient_fname,
             "patient_lname" => patient_lname,
             "patient_tel" => patient_tel,
             "patient_cid" => patient_cid,
-            "patient_addr" => patient_addr,
-            "user_id" => user_id,
-            "hn" => hn
+            "patient_date" => patient_date,
+            "patient_no" => patient_no,
+            "patient_id" => patient_id
           }
       ){
         Ok(userUpdate) => userUpdate,
         Err(err) => return Err(format!("Failed to execute update query: {}", err)),
       };
-
-
-
-
     // println!("Last insert ID: {}", user_id);
      // Return the ID of the inserted and updated item
     Ok("ok".to_string())
@@ -611,17 +607,16 @@ async fn read_report_date(begin: String,end:String) -> Result<Vec<ReportByDate>,
 
     let _reports: Vec<ReportByDate> = match conn.exec_map(
         "SELECT
-          p.patient_hn AS hn,
-          CONCAT( p.patient_title, p.patient_fname, ' ', p.patient_lname ) AS name,
+          '' AS hn,
+          CONCAT( patient_title, patient_fname, ' ', patient_lname ) AS name,
           IFNULL(patient_tel,'') AS tel,
-          DATE_FORMAT(s.phistory_date, '%Y-%m-%d') AS date,
-          DATE_FORMAT(s.phistory_time, '%H:%i:%s') AS time
+          DATE_FORMAT(patient_created, '%Y-%m-%d') AS date,
+          patient_no AS time
         FROM
-            patient AS p
-        INNER JOIN  phistory AS s
-        ON p.patient_hn = s.patient_hn
-        WHERE DATE_FORMAT(phistory_date, '%Y-%m-%d') BETWEEN :begin AND :end
-        ORDER BY s.phistory_date,s.phistory_time DESC
+            tb_patient
+
+        WHERE DATE_FORMAT(patient_created, '%Y-%m-%d') BETWEEN :begin AND :end
+        ORDER BY patient_created DESC
         ",
           params! {
               "begin" => begin,
@@ -649,6 +644,7 @@ async fn read_patient_search_name(name: String) -> Result<Vec<PatientSearchName>
     let search_pattern = format!("%{}%", name); // Prepare the search pattern
     let _patient: Vec<PatientSearchName> = match conn.exec_map(
         "SELECT
+            patient_id,
             patient_title,
             patient_fname,
             patient_lname,
@@ -664,7 +660,7 @@ async fn read_patient_search_name(name: String) -> Result<Vec<PatientSearchName>
           params! {
               "search" => &search_pattern,
           },
-          |(patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no)| PatientSearchName {patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no },
+          |(patient_id,patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no)| PatientSearchName {patient_id,patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no },
     ){
               Ok(_patient) => _patient,
               Err(err) => return Err(format!("Failed to execute query: {}", err)),
@@ -685,6 +681,7 @@ async fn read_patient_search_cid(cid: String) -> Result<Vec<PatientSearchName>,S
     let search_pattern = format!("%{}%", cid); // Prepare the search pattern
     let _patient: Vec<PatientSearchName> = match conn.exec_map(
         "SELECT
+            patient_id,
             patient_title,
             patient_fname,
             patient_lname,
@@ -700,7 +697,7 @@ async fn read_patient_search_cid(cid: String) -> Result<Vec<PatientSearchName>,S
           params! {
               "search" => &search_pattern,
           },
-          |(patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no)| PatientSearchName {patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no },
+          |(patient_id,patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no)| PatientSearchName {patient_id,patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no },
     ){
               Ok(_patient) => _patient,
               Err(err) => return Err(format!("Failed to execute query: {}", err)),
@@ -721,6 +718,7 @@ async fn read_patient_search_date(date: String) -> Result<Vec<PatientSearchName>
     let search_pattern = format!("%{}%", date); // Prepare the search pattern
     let _patient: Vec<PatientSearchName> = match conn.exec_map(
         "SELECT
+            patient_id,
             patient_title,
             patient_fname,
             patient_lname,
@@ -734,7 +732,7 @@ async fn read_patient_search_date(date: String) -> Result<Vec<PatientSearchName>
           params! {
               "search" => &search_pattern,
           },
-          |(patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no)| PatientSearchName {patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no },
+          |(patient_id,patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no)| PatientSearchName {patient_id,patient_title,patient_fname,patient_lname,patient_tel,patient_cid,patient_created,patient_no },
     ){
               Ok(_patient) => _patient,
               Err(err) => return Err(format!("Failed to execute query: {}", err)),

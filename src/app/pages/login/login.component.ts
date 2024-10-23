@@ -87,7 +87,7 @@ export class LoginComponent implements OnInit {
             verticalPosition: 'bottom',
             panelClass:['success-snackbar']
           }).afterDismissed().subscribe(() => {
-            this.router.navigate(['dashboard']);
+            this.router.navigate(['patient']);
           });
         } else {
           this._snackBar.open('ชื่อผู้ใช้งาน หรือ รหัสผ่าน ไม่ถูกต้อง', 'ลองอีกครั้ง', {
