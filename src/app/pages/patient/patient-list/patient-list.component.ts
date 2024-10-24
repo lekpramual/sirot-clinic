@@ -110,15 +110,23 @@ export default class PatientListComponent implements OnInit{
 
   @Input() set tbData(val:any){
     this._data = val;
-    console.log('tbData >>>',val);
-    this.dataSource.data = val;
+    // console.log('tbData >>>',val);
+    this.isLoading = true;
+    // console.log('loading true..')
+    setTimeout(() => {
+      // console.log('loading false..')
+      this.isLoading = false;
+      // Example data. If empty, "No Data" message will be displayed.
+      this.dataSource.data = val; // Change to some data array to display data in the table.
+    }, 2000); // Simulate a 3-second data load delay
+
+
   }
 
   @Input() set searchPatient(val:any){
     // this._data = val;
     // this.dataSource.data = val;
-    // TODO
-    console.log('>>>>',val);
+    // console.log('>>>>',val);
     this._searchPatient.update((result) => ({
       ...result,
       searchOption:val.searchOption,
@@ -163,7 +171,7 @@ export default class PatientListComponent implements OnInit{
 
 
     this.messageChange.emit('open');
-    console.log('create >>>', this.formPatient())
+    // console.log('create >>>', this.formPatient())
     const rowPatient:any = this.formPatient();
     this.formChange.emit(rowPatient);
     //  this.sideCreate.set(true)
@@ -204,7 +212,7 @@ export default class PatientListComponent implements OnInit{
 
   // ฟอร์มเพิ่ม
   initForm() {
-    console.log(this._searchPatient().searchOption);
+    // console.log(this._searchPatient().searchOption);
 
     const _option = this._searchPatient().searchOption;
     if(_option == 'name'){
@@ -236,8 +244,8 @@ export default class PatientListComponent implements OnInit{
     // this.initForm();
     this.userId = await this._authService.getUserId();
     setTimeout(() => {
-      console.log('isloading false ...')
-      console.log('isloading false ...')
+      // console.log('isloading false ...')
+      // console.log('isloading false ...')
       this.isLoading = false;
     },2000)
   }
@@ -263,7 +271,7 @@ export default class PatientListComponent implements OnInit{
       patient_title: row.patient_title
     }))
 
-    console.log('update >>>', this.formPatient())
+    // console.log('update >>>', this.formPatient())
     const rowPatient:any = this.formPatient();
     this.formChange.emit(rowPatient);
   }
@@ -284,7 +292,7 @@ export default class PatientListComponent implements OnInit{
       patient_title: row.patient_title
     })
 
-    console.log('copy >>>', this.formPatient());
+    // console.log('copy >>>', this.formPatient());
     const rowPatient:any = this.formPatient();
     this.formChange.emit(rowPatient);
   }
@@ -309,14 +317,14 @@ export default class PatientListComponent implements OnInit{
   onSearch() {
     if (this.searchForm.valid) {
       const formValue = this.searchForm.value;
-      console.log('Search triggered with:', formValue);
+      // console.log('Search triggered with:', formValue);
       let _searchOption =this.searchForm.value.searchOption;
       let _searchText =this.searchForm.value.searchText;
       let _searchCid =this.searchForm.value.searchCid;
       let _searchDate = this.searchForm.value.searchDate != ''? moment(this.searchForm.value.searchDate).add('year', (-543)).format("YYYY-MM-DD") : '';
 
       if(_searchOption == 'name'){
-        console.log(_searchOption)
+        // console.log(_searchOption)
         // this._patientServie.readPatientSearchName(_searchText);
         const _formSearch:any = {
           searchOption:_searchOption,
@@ -353,7 +361,7 @@ export default class PatientListComponent implements OnInit{
       this.isLoading = false;
       throw error;
     } finally {
-      console.log('Loading success....');
+      // console.log('Loading success....');
       setTimeout(() => {
         this.isLoading = false;
       }, 3000);
@@ -373,7 +381,7 @@ export default class PatientListComponent implements OnInit{
       this.isLoading = false;
       throw error;
     } finally {
-      console.log('Loading success....');
+      // console.log('Loading success....');
       setTimeout(() => {
         this.isLoading = false;
       }, 3000);
@@ -392,7 +400,7 @@ export default class PatientListComponent implements OnInit{
       this.isLoading = false;
       throw error;
     } finally {
-      console.log('Loading success....');
+      // console.log('Loading success....');
       setTimeout(() => {
         this.isLoading = false;
       }, 3000);
@@ -412,7 +420,7 @@ export default class PatientListComponent implements OnInit{
    // Method to handle the selection change event
    onSelectionChange(event: MatSelectChange) {
     const _selectValue = event.value;
-    console.log('Selected value:', _selectValue);
+    // console.log('Selected value:', _selectValue);
     // You can add more logic here if needed
     if(_selectValue == 'cid'){
 

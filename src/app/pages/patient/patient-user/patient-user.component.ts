@@ -108,7 +108,7 @@ export class PatientUserComponent implements OnInit{
 
   @Input() set formPatient(val:any){
 
-    console.log('>>>> val',val)
+    // console.log('>>>> val',val)
     this._formPatient.set(val);
 
     this.initForm();
@@ -185,7 +185,7 @@ export class PatientUserComponent implements OnInit{
         let patientNo = this.formGroupData.value.patient_no;
 
         const action = this._formPatient().action;
-        console.log('action >>>',action);
+        // console.log('action >>>',action);
         if(action == 'update'){
           const patientId = parseInt(this._formPatient().patient_id);
 
@@ -251,7 +251,7 @@ export class PatientUserComponent implements OnInit{
   // ฟอร์มเพิ่ม
   initForm() {
 
-    console.log('>>>> formPatient',this._formPatient())
+    // console.log('>>>> formPatient',this._formPatient())
 
     if(this._formPatient().action == 'create'){
       this.formGroupData = new FormGroup({

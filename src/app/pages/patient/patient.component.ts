@@ -64,7 +64,7 @@ export default class PatientComponent  implements OnInit {
   }
 
   onMessageChange($event:any){
-    console.log($event);
+    // console.log($event);
     if($event === 'open'){
       this.isOpened.set(true);
     }else if($event === 'close'){
@@ -85,7 +85,7 @@ export default class PatientComponent  implements OnInit {
   }
 
   formChangeSearch($event:any){
-    console.log('>>> event change Search',$event);
+    // console.log('>>> event change Search',$event);
     const _option = $event.searchOption;
     const _value = $event.searchValue;
     this.searchPatient.update((result) => ({
@@ -106,7 +106,7 @@ export default class PatientComponent  implements OnInit {
   }
 
   onFormData($event:any){
-    console.log('>>> event',$event);
+    // console.log('>>> event',$event);
     this.formPatient.update((result) => ({
       ...result,
       action:$event.action,
@@ -119,7 +119,7 @@ export default class PatientComponent  implements OnInit {
       patient_tel: $event.patient_tel,
       patient_title: $event.patient_title
     }));
-    console.log($event);
+    // console.log($event);
   }
 
 
@@ -132,7 +132,7 @@ export default class PatientComponent  implements OnInit {
       console.error('Error fetching data:', error);
       throw error;
     } finally {
-      console.log('Loading success....');
+      // console.log('Loading success....');
 
 
     }
@@ -149,7 +149,7 @@ export default class PatientComponent  implements OnInit {
 
       throw error;
     } finally {
-      console.log('Loading success....');
+      // console.log('Loading success....');
       setTimeout(() => {
       }, 3000);
 
@@ -166,7 +166,7 @@ export default class PatientComponent  implements OnInit {
 
       throw error;
     } finally {
-      console.log('Loading success....');
+      // console.log('Loading success....');
       setTimeout(() => {
       }, 3000);
 
